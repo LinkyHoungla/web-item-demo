@@ -58,12 +58,12 @@ export default {
     login(){
       this.$refs.loginFormRel.validate(async valid => {
           if(!valid) return;
-          const { data: res } = await this.$http.post('login', this.loginForm);
+          const { data: res } = await this.$http.post('admin/login', this.loginForm);
           if(res.status != 200) return this.$message.error(res.message)
           this.$message.success('登录成功')
 
           //token存储
-          window.sessionStorage.setItem("token", res.data.token)
+          window.sessionStorage.setItem("token", res.data.password)
           //页面跳转
           this.$router.push('/home')
         });
