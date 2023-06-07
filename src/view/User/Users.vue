@@ -9,6 +9,7 @@
 
     <!-- 卡片视图 -->
     <el-card class="box-card">
+      <!-- 收索区域 -->
       <el-row :gutter="20">
         <el-col :span="10">
           <!-- 搜索框 -->
@@ -20,13 +21,68 @@
           <el-button type="primary">添加用户</el-button>
         </el-col>
       </el-row>
+
+      <!-- 列表区域 -->
+      <el-table :data="adminList">
+        <el-table-column type="index"></el-table-column>
+        <el-table-column label="用户名" prop="username"></el-table-column>
+        <el-table-column label="角色" prop="role"></el-table-column>
+        <el-table-column label="创建时间" prop="createAt"></el-table-column>
+        <el-table-column label="上次登录时间" prop="createAt"></el-table-column>
+        <el-table-column label="上次退出时间" prop="createAt"></el-table-column>
+        <el-table-column label="操作" width="160px">
+          <template>
+            <el-button type="primary" icon="el-icon-edit" size="mini"/>
+            <el-button type="danger" icon="el-icon-delete" size="mini"/>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- 分页区域 -->
+      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="queruInfo.pageNum" :page-sizes="[1,2,5,10]" :page-size="queruInfo.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="totalNum"></el-pagination>
     </el-card>
   </div>
 </template>
 
 <script>
 export default {
-
+  name:'Users',
+  data(){
+    return {
+      // 获取用户列表的参数对象
+      queruInfo: {
+        query: '',
+        pageNum: 0,
+        pageSize: 2,
+      },
+      totalNum: 0,
+      adminList: [],
+    }
+  },
+  created(){
+    this.getAdminList()
+  },
+  methods:{
+    async getAdminList() {
+      const { data : res } = await this.$http.get(
+        'admin/page',
+        {params: this.queruInfo}
+      )
+      if(res.status !== 200) return this.$message.error('获取失败')
+      this.adminList = res.data.array
+      this.totalNum = res.data.totalNum
+    },
+    // 监听 pagesize 改变
+    handleSizeChange(newSize){
+      this.queruInfo.pageSize = newSize 
+      this.getAdminList()
+    },
+    // 监听 页码值 改变
+    handleCurrentChange(newPage){
+      this.queruInfo.pageNum = newPage 
+      this.getAdminList()
+    },
+  }
 }
 </script>
 

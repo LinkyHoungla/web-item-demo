@@ -1,6 +1,6 @@
 import Vue from 'vue'
 
-import { Form, FormItem, Input, Button, Message, Container, Header, Aside, Main, Menu, Submenu, MenuItem, Breadcrumb, BreadcrumbItem, Card, Row, Col } from 'element-ui'
+import { Form, FormItem, Input, Button, Message, Container, Header, Aside, Main, Menu, Submenu, MenuItem, Breadcrumb, BreadcrumbItem, Card, Row, Col, Table, TableColumn, Pagination } from 'element-ui'
 
 Vue.use(Form)
 Vue.use(FormItem)
@@ -24,6 +24,11 @@ Vue.use(Card)
 
 Vue.use(Col)
 Vue.use(Row)
+
+Vue.use(Table)
+Vue.use(TableColumn)
+
+Vue.use(Pagination)
 
 //导入弹窗
 Vue.prototype.$message = Message
