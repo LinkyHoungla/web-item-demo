@@ -13,8 +13,8 @@
       <el-row :gutter="20">
         <el-col :span="10">
           <!-- 搜索框 -->
-          <el-input placeholder="请输入内容">
-            <el-button slot="append" icon="el-icon-search"/>
+          <el-input placeholder="请输入内容" v-model="queryInfo.query" clearable @clear="getAdminList">
+            <el-button slot="append" icon="el-icon-search" @click="getAdminList"/>
           </el-input>
         </el-col>
         <el-col :span="4">
@@ -39,7 +39,7 @@
       </el-table>
 
       <!-- 分页区域 -->
-      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="queruInfo.pageNum" :page-sizes="[1,2,5,10]" :page-size="queruInfo.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="totalNum"></el-pagination>
+      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="queryInfo.pageNum" :page-sizes="[1,2,5,10]" :page-size="queryInfo.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="totalNum"></el-pagination>
     </el-card>
   </div>
 </template>
@@ -50,7 +50,7 @@ export default {
   data(){
     return {
       // 获取用户列表的参数对象
-      queruInfo: {
+      queryInfo: {
         query: '',
         pageNum: 0,
         pageSize: 2,
@@ -66,7 +66,7 @@ export default {
     async getAdminList() {
       const { data : res } = await this.$http.get(
         'admin/page',
-        {params: this.queruInfo}
+        {params: this.queryInfo}
       )
       if(res.status !== 200) return this.$message.error('获取失败')
       this.adminList = res.data.array
@@ -74,12 +74,12 @@ export default {
     },
     // 监听 pagesize 改变
     handleSizeChange(newSize){
-      this.queruInfo.pageSize = newSize 
+      this.queryInfo.pageSize = newSize 
       this.getAdminList()
     },
     // 监听 页码值 改变
     handleCurrentChange(newPage){
-      this.queruInfo.pageNum = newPage 
+      this.queryInfo.pageNum = newPage 
       this.getAdminList()
     },
   }
