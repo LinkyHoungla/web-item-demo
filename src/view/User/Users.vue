@@ -13,12 +13,23 @@
       <el-row :gutter="20">
         <el-col :span="10">
           <!-- 搜索框 -->
-          <el-input placeholder="请输入内容" v-model="queryInfo.query" clearable @clear="getAdminList">
-            <el-button slot="append" icon="el-icon-search" @click="getAdminList"/>
+          <el-input
+            placeholder="请输入内容"
+            v-model="queryInfo.query"
+            clearable
+            @clear="getAdminList"
+          >
+            <el-button
+              slot="append"
+              icon="el-icon-search"
+              @click="getAdminList"
+            />
           </el-input>
         </el-col>
         <el-col :span="4">
-          <el-button type="primary">添加用户</el-button>
+          <el-button type="primary" @click="addDialogVisible = true"
+            >添加用户</el-button
+          >
         </el-col>
       </el-row>
 
@@ -32,60 +43,148 @@
         <el-table-column label="上次退出时间" prop="createAt"></el-table-column>
         <el-table-column label="操作" width="160px">
           <template>
-            <el-button type="primary" icon="el-icon-edit" size="mini"/>
-            <el-button type="danger" icon="el-icon-delete" size="mini"/>
+            <el-button type="primary" icon="el-icon-edit" size="mini" />
+            <el-button type="danger" icon="el-icon-delete" size="mini" />
           </template>
         </el-table-column>
       </el-table>
 
       <!-- 分页区域 -->
-      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="queryInfo.pageNum" :page-sizes="[1,2,5,10]" :page-size="queryInfo.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="totalNum"></el-pagination>
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="queryInfo.pageNum"
+        :page-sizes="[1, 2, 5, 10]"
+        :page-size="queryInfo.pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="totalNum"
+      ></el-pagination>
     </el-card>
+
+    <!-- 用户添加对话框 -->
+    <el-dialog
+      title="添加用户"
+      :visible.sync="addDialogVisible"
+      width="50%"
+      @close="addDialogClosed"
+    >
+      <!-- 内容主题区域 -->
+      <el-form
+        :model="addForm"
+        :rules="addFormRules"
+        ref="addFormRel"
+        label-width="70px"
+        class="demo"
+      >
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="addForm.username"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="addForm.password"></el-input>
+        </el-form-item>
+        <el-form-item label="权限角色" prop="role">
+          <el-input v-model="addForm.role"></el-input>
+        </el-form-item>
+      </el-form>
+
+      <!-- 底部区域 -->
+      <span slot="footer" class="dialog=footer">
+        <el-button @click="addDialogVisible = false">取消</el-button>
+        <el-button @click="addAdmin">确定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 export default {
-  name:'Users',
-  data(){
+  name: "Users",
+  data() {
+    // 自定义 名称 校验规则
+    var checkName = async (rule, value, cb) => {
+      const { data: res } = await this.$http.get("admin/sameName", {
+        params: { username: value },
+      });
+      if (res.status === 200) return cb();
+      return cb(new Error(res.message));
+    };
+
     return {
       // 获取用户列表的参数对象
       queryInfo: {
-        query: '',
+        query: "",
         pageNum: 0,
         pageSize: 2,
       },
       totalNum: 0,
       adminList: [],
-    }
+      // 对话框显示
+      addDialogVisible: false,
+      // 添加用户的表单数据
+      addForm: {
+        username: "",
+        password: "",
+        role: "",
+      },
+      // 添加表单的验证规则对象
+      addFormRules: {
+        username: [
+          { required: true, message: "请输入用户名", trigger: "blur" },
+          { validator: checkName, trigger: "blur" },
+        ],
+        password: [
+          { required: true, message: "请输入密码", trigger: "blur" },
+          { min: 6, max: 15, message: "用户名长度在6-15之间" },
+        ],
+        role: [
+          { required: true, message: "请输入权限", trigger: "blur" },
+          { min: 3, max: 10, message: "权限名长度在3-10之间" },
+        ],
+      },
+    };
   },
-  created(){
-    this.getAdminList()
+  created() {
+    this.getAdminList();
   },
-  methods:{
+  methods: {
+    // 得到 管理员 列表
     async getAdminList() {
-      const { data : res } = await this.$http.get(
-        'admin/page',
-        {params: this.queryInfo}
-      )
-      if(res.status !== 200) return this.$message.error('获取失败')
-      this.adminList = res.data.array
-      this.totalNum = res.data.totalNum
+      const { data: res } = await this.$http.get("admin/page", {
+        params: this.queryInfo,
+      });
+      if (res.status !== 200) return this.$message.error("获取失败");
+      this.adminList = res.data.array;
+      this.totalNum = res.data.totalNum;
     },
     // 监听 pagesize 改变
-    handleSizeChange(newSize){
-      this.queryInfo.pageSize = newSize 
-      this.getAdminList()
+    handleSizeChange(newSize) {
+      this.queryInfo.pageSize = newSize;
+      this.getAdminList();
     },
     // 监听 页码值 改变
-    handleCurrentChange(newPage){
-      this.queryInfo.pageNum = newPage 
-      this.getAdminList()
+    handleCurrentChange(newPage) {
+      this.queryInfo.pageNum = newPage;
+      this.getAdminList();
     },
-  }
-}
+    // 监听 用户添加框 关闭事件
+    addDialogClosed() {
+      this.$refs.addFormRel.resetFields();
+    },
+    // 用户添加
+    addAdmin() {
+      this.$refs.addFormRel.validate(async (valid) => {
+        if (!valid) return;
+        const { data: res } = await this.$http.post("admin", this.addForm);
+        if (res.status !== 200) this.$message.error("添加失败");
+        this.$message.success("添加成功");
+
+        this.addDialogVisible = false;
+        this.getAdminList();
+      });
+    },
+  },
+};
 </script>
 
 <style lang="less" scoped>
-
 </style>
