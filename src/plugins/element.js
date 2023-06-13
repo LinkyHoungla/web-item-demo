@@ -1,6 +1,6 @@
 import Vue from 'vue'
 
-import { Form, FormItem, Input, Button, Message, Container, Header, Aside, Main, Menu, Submenu, MenuItem, Breadcrumb, BreadcrumbItem, Card, Row, Col, Table, TableColumn, Pagination, Dialog } from 'element-ui'
+import { Form, FormItem, Input, Button, Message, Container, Header, Aside, Main, Menu, Submenu, MenuItem, Breadcrumb, BreadcrumbItem, Card, Row, Col, Table, TableColumn, Pagination, Dialog, MessageBox } from 'element-ui'
 
 // 表单
 Vue.use(Form)
@@ -40,6 +40,9 @@ Vue.use(Pagination)
 
 // 弹出框
 Vue.use(Dialog)
+
+// 弹出栏
+Vue.prototype.$confirm = MessageBox.confirm
 
 //导入弹窗
 Vue.prototype.$message = Message

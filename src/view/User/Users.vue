@@ -42,9 +42,21 @@
         <el-table-column label="上次登录时间" prop="createAt"></el-table-column>
         <el-table-column label="上次退出时间" prop="createAt"></el-table-column>
         <el-table-column label="操作" width="160px">
-          <template>
-            <el-button type="primary" icon="el-icon-edit" size="mini" />
-            <el-button type="danger" icon="el-icon-delete" size="mini" />
+          <template slot-scope="scope">
+            <!-- 修改按钮 -->
+            <el-button
+              type="primary"
+              icon="el-icon-edit"
+              size="mini"
+              @click="showEditDialog(scope.row)"
+            />
+            <!-- 删除按钮 -->
+            <el-button
+              type="danger"
+              icon="el-icon-delete"
+              size="mini"
+              @click="removeAdmin(scope.row.account)"
+            />
           </template>
         </el-table-column>
       </el-table>
@@ -74,7 +86,6 @@
         :rules="addFormRules"
         ref="addFormRel"
         label-width="70px"
-        class="demo"
       >
         <el-form-item label="用户名" prop="username">
           <el-input v-model="addForm.username"></el-input>
@@ -91,6 +102,38 @@
       <span slot="footer" class="dialog=footer">
         <el-button @click="addDialogVisible = false">取消</el-button>
         <el-button @click="addAdmin">确定</el-button>
+      </span>
+    </el-dialog>
+
+    <!-- 用户修改对话框 -->
+    <el-dialog
+      title="修改用户"
+      :visible.sync="editDialogVisible"
+      width="50%"
+      @close="editDialogClosed"
+    >
+      <!-- 内容主题区域 -->
+      <el-form
+        :model="editForm"
+        :rules="addFormRules"
+        ref="editFormRel"
+        label-width="70px"
+      >
+        <el-form-item label="ID" prop="account">
+          <el-input v-model="editForm.account" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="管理名" prop="username">
+          <el-input v-model="editForm.username"></el-input>
+        </el-form-item>
+        <el-form-item label="权限角色" prop="role">
+          <el-input v-model="editForm.role"></el-input>
+        </el-form-item>
+      </el-form>
+
+      <!-- 底部区域 -->
+      <span slot="footer" class="dialog=footer">
+        <el-button @click="editDialogVisible = false">取消</el-button>
+        <el-button @click="editAdmin">确定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -120,12 +163,15 @@ export default {
       adminList: [],
       // 对话框显示
       addDialogVisible: false,
+      editDialogVisible: false,
       // 添加用户的表单数据
       addForm: {
         username: "",
         password: "",
         role: "",
       },
+      // 修改用户的表单数据
+      editForm: {},
       // 添加表单的验证规则对象
       addFormRules: {
         username: [
@@ -180,6 +226,37 @@ export default {
 
         this.addDialogVisible = false;
         this.getAdminList();
+      });
+    },
+    // 展示编辑用户的对话框
+    showEditDialog(temp) {
+      this.editForm = {
+        account: temp.account,
+        username: temp.username,
+        role: temp.role,
+      };
+      this.editDialogVisible = true;
+    },
+    // 监听 修改框 关闭时间
+    editDialogClosed() {
+      this.$refs.editFormRel.resetFields();
+    },
+    // 用户修改
+    editAdmin() {
+      this.$refs.editFormRel.validate(async (valid) => {
+        if (!valid) return;
+        const { data: res } = await this.$http.put(
+          "admin/" + this.editForm.account,
+          {
+            username: this.editForm.username,
+            role: this.editForm.role,
+          }
+        );
+        if (res.status !== 200) this.$message.error("修改失败");
+
+        this.editDialogVisible = false;
+        this.getAdminList();
+        this.$message.success("修改成功");
       });
     },
   },
