@@ -27,9 +27,7 @@
           </el-input>
         </el-col>
         <el-col :span="4">
-          <el-button type="primary" @click="addDialogVisible = true"
-            >添加用户</el-button
-          >
+          <el-button type="primary" @click="showAddDialog">添加用户</el-button>
         </el-col>
       </el-row>
 
@@ -94,7 +92,15 @@
           <el-input v-model="addForm.password"></el-input>
         </el-form-item>
         <el-form-item label="权限角色" prop="role">
-          <el-input v-model="addForm.role"></el-input>
+          <!-- <el-input v-model="addForm.role"></el-input> -->
+          <el-select v-model="addForm.role">
+            <el-option
+              v-for="item in roleList"
+              :key="item.roleId"
+              :label="item.roleName"
+              :value="item.roleCode"
+            ></el-option>
+          </el-select>
         </el-form-item>
       </el-form>
 
@@ -126,7 +132,15 @@
           <el-input v-model="editForm.username"></el-input>
         </el-form-item>
         <el-form-item label="权限角色" prop="role">
-          <el-input v-model="editForm.role"></el-input>
+          <!-- <el-input v-model="editForm.role"></el-input> -->
+          <el-select v-model="editForm.role">
+            <el-option
+              v-for="item in roleList"
+              :key="item.roleId"
+              :label="item.roleName"
+              :value="item.roleCode"
+            ></el-option>
+          </el-select>
         </el-form-item>
       </el-form>
 
@@ -148,7 +162,11 @@ export default {
       const { data: res } = await this.$http.get("admin/sameName", {
         params: { username: value },
       });
-      if (res.status === 200) return cb();
+      if (
+        res.status === 200 ||
+        (res.status === 201 && value === this.originaName)
+      )
+        return cb();
       return cb(new Error(res.message));
     };
 
@@ -161,6 +179,7 @@ export default {
       },
       totalNum: 0,
       adminList: [],
+      roleList: [],
       // 对话框显示
       addDialogVisible: false,
       editDialogVisible: false,
@@ -170,6 +189,8 @@ export default {
         password: "",
         role: "",
       },
+      // 修改前的命名
+      originaName: "",
       // 修改用户的表单数据
       editForm: {},
       // 添加表单的验证规则对象
@@ -228,13 +249,26 @@ export default {
         this.getAdminList();
       });
     },
-    // 展示编辑用户的对话框
-    showEditDialog(temp) {
+    // 展示 添加用户 对话框
+    async showAddDialog() {
+      const { data: res } = await this.$http.get("roles");
+      this.roleList = res.data;
+
+      this.addDialogVisible = true;
+    },
+    // 展示 编辑用户 对话框
+    async showEditDialog(temp) {
       this.editForm = {
         account: temp.account,
         username: temp.username,
         role: temp.role,
       };
+
+      this.originaName = temp.username;
+
+      const { data: res } = await this.$http.get("roles");
+      this.roleList = res.data;
+
       this.editDialogVisible = true;
     },
     // 监听 修改框 关闭时间
