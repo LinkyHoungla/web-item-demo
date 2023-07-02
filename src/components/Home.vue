@@ -3,8 +3,9 @@
     <!-- 头部 -->
     <el-header>
       <div>
-        <img src="@/assets/niubi.jpg" alt="">
+        <img src="@/assets/niubi.jpg" alt="" />
         <span>后台管理系统</span>
+        <span>{{ loginAdminVo }}</span>
       </div>
       <el-button type="info" @click="logout">退出</el-button>
     </el-header>
@@ -22,51 +23,77 @@
 </template>
 
 <script>
-import Aside from '@/components/Aside.vue'
+import Aside from "@/components/Aside.vue";
 
 export default {
-  name:'home',
+  name: "home",
   components: {
-    Aside
+    Aside,
   },
-  methods:{
+  data() {
+    return {
+      loginAdminVo: {
+        role: "",
+        name: "",
+        avatar: "",
+      },
+    };
+  },
+  created() {
+    // this.getMenuList();
+    this.getLoginAdminVo();
+  },
+  methods: {
     // 退出登录
-    logout(){
-      window.sessionStorage.clear();
-      this.$router.push("/login");
+    logout() {
+      // window.sessionStorage.clear();
+      this.$store.dispatch("admin/logout").then(() => {
+        this.$router.push("/login");
+      });
     },
-  }
-}
+    // 获取当前登录者信息
+    getLoginAdminVo() {
+      this.$store
+        .dispatch("admin/getAdminInfo")
+        .then(() => {
+          this.loginAdminVo.role = this.$store.getters.role;
+          this.loginAdminVo.name = this.$store.getters.name;
+          this.loginAdminVo.avatar = this.$store.getters.avatar;
+        })
+        .catch((error) => {});
+    },
+  },
+};
 </script>
 
 <style lang="less" scoped>
-  .home-container {
-    height: 100%;
-  }
-  .el-header{
-    background-color: #373D41;
+.home-container {
+  height: 100%;
+}
+.el-header {
+  background-color: #373d41;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  font-size: 20px;
+
+  > div {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    color: #fff;
-    font-size: 20px;
 
-    > div {
-      display: flex;
-      align-items: center;
+    > img {
+      widows: 50px;
+      height: 50px;
+    }
 
-      > img {
-        widows: 50px;
-        height: 50px;
-      }
-      
-      > span {
-        margin-left: 15px;
-      }
+    > span {
+      margin-left: 15px;
     }
   }
+}
 
-  .el-main {
-    background-color: #eaedf1;
-  }
+.el-main {
+  background-color: #eaedf1;
+}
 </style>>

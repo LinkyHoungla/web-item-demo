@@ -61,7 +61,7 @@ export default {
     },
   },
   created() {
-    this.getMenuList();
+    // this.getMenuList();
   },
   methods: {
     // 获取所有菜单

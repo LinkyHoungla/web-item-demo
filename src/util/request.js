@@ -14,9 +14,8 @@ const service = axios.create({
 // request拦截器
 service.interceptors.request.use(config => {
   // 在请求发送前保存token
-  if (store.getters.token) {
-    config.headers['Authorization'] = getToken() // 让每个请求携带token--['X-Token']为自定义key 请根据实际情况自行修改
-  }
+  const token = getToken();
+  config.headers['Authorization'] = 'Bearer ' + token// 让每个请求携带token--['X-Token']为自定义key 请根据实际情况自行修改
   return config
 }, error => {
   // 在请求放生错误是如何处理

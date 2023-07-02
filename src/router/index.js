@@ -1,5 +1,6 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
+import { getToken } from "@/util/auth";
 
 //组件导入
 import Login from '@/components/Login.vue'
@@ -34,7 +35,7 @@ const router = new VueRouter({
 //挂载路由导航守卫
 router.beforeEach((to, from, next) => {
   if (to.path === '/login') return next();
-  const tokenStr = window.sessionStorage.getItem('token')
+  const tokenStr = getToken()
   if (!tokenStr) return next('/login')
   next()
 })
