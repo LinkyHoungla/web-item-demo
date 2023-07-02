@@ -45,8 +45,6 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
-
 export default {
   name: "Aside",
   data() {
@@ -58,7 +56,6 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getUser"]),
     user() {
       return this.getUser;
     },
@@ -70,7 +67,9 @@ export default {
     // 获取所有菜单
     async getMenuList() {
       console.log(this.user);
-      const { data: res } = await this.$http.get("menus/" + this.user);
+      const { data: res } = await this.$http.get(
+        "menus/" + this.$store.getters.username
+      );
       if (res.status !== 200) return this.$message.error(res.message);
       this.menusList = res.data;
     },

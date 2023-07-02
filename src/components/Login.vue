@@ -39,8 +39,6 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
-
 export default {
   data() {
     return {
@@ -65,29 +63,40 @@ export default {
     };
   },
   methods: {
-    // 映射VueX方法
-    ...mapActions(["loginUser"]),
     //重置登录表单
     resetLoginForm() {
       this.$refs.loginFormRel.resetFields();
     },
     //表单验证
-    login() {
-      this.$refs.loginFormRel.validate(async (valid) => {
-        if (!valid) return;
-        const { data: res } = await this.$http.post(
-          "login/admin",
-          this.loginForm
-        );
-        if (res.status != 200) return this.$message.error(res.message);
-        this.$message.success("登录成功");
+    // login() {
+    //   this.$refs.loginFormRel.validate(async (valid) => {
+    //     if (!valid) return;
+    //     const { data: res } = await this.$http.post(
+    //       "login/admin",
+    //       this.loginForm
+    //     );
+    //     if (res.status != 200) return this.$message.error(res.message);
+    //     this.$message.success("登录成功");
 
-        //token存储
-        window.sessionStorage.setItem("token", res.data.password);
-        // 用户信息存储
-        this.loginUser(this.loginForm.username);
-        //页面跳转
-        this.$router.push("/home");
+    //     //token存储
+    //     window.sessionStorage.setItem("token", res.data.password);
+    //     // 用户信息存储
+    //     this.loginUser(this.loginForm.username);
+    //     //页面跳转
+    //     this.$router.push("/home");
+    //   });
+    // },
+    login() {
+      this.$refs.loginFormRel.validate((valid) => {
+        if (valid) {
+          this.$store.dispatch("admin/login", this.loginForm).then(() => {
+            this.$router.push("/home");
+            console.log(this.$router);
+          });
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
       });
     },
   },
