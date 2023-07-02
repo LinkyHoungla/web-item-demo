@@ -15,7 +15,7 @@ const service = axios.create({
 service.interceptors.request.use(config => {
   // 在请求发送前保存token
   if (store.getters.token) {
-    config.headers['X-Token'] = getToken() // 让每个请求携带token--['X-Token']为自定义key 请根据实际情况自行修改
+    config.headers['Authorization'] = getToken() // 让每个请求携带token--['X-Token']为自定义key 请根据实际情况自行修改
   }
   return config
 }, error => {
@@ -27,39 +27,32 @@ service.interceptors.request.use(config => {
 
 // respone拦截器
 service.interceptors.response.use(
-  response => {
-    // 通过response自定义code来标示请求状态，当code返回如下情况为权限有问题，登出并返回到登录页
-    const res = response.data;
-    if (res.status !== 200) {
-      Message({
-        message: res.message,
-        type: 'error',
-        duration: 5 * 1000
-      });
-      // 450:非法的token; 451:Token 过期;
-      if (res.status === 450 || res.status === 451) {
-        MessageBox.confirm('你已被登出，可以取消继续留在该页面，或者重新登录', '确定登出', {
-          confirmButtonText: '重新登录',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          store.dispatch('FedLogOut').then(() => {
-            location.reload();// 为了重新实例化vue-router对象 避免bug
-          });
-        })
-      }
-      return Promise.reject('error');
-    } else {
-      return response.data;
-    }
-  },
+  response => response,
   error => {
-    console.log('err' + error)
+    console.log(error)
+    // 通过response自定义code来标示请求状态，当code返回如下情况为权限有问题，登出并返回到登录页
+    const res = error.response.data
+    let errorMessage = res.message
+    // 401：用户名不存在或密码错误
+    if (res.status === 401)
+      errorMessage = '用户名或密码错误'
     Message({
-      message: error.message,
+      message: errorMessage,
       type: 'error',
       duration: 5 * 1000
-    })
+    });
+    // 450:非法的token; 451:Token 过期;
+    if (res.status === 450 || res.status === 451) {
+      MessageBox.confirm('你已被登出，可以取消继续留在该页面，或者重新登录', '确定登出', {
+        confirmButtonText: '重新登录',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        store.dispatch('FedLogOut').then(() => {
+          location.reload();// 为了重新实例化vue-router对象 避免bug
+        });
+      })
+    }
     return Promise.reject(error)
   }
 )

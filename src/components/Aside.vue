@@ -66,7 +66,7 @@ export default {
   methods: {
     // 获取所有菜单
     async getMenuList() {
-      console.log(this.user);
+      console.log(this.$store.getters.username);
       const { data: res } = await this.$http.get(
         "menus/" + this.$store.getters.username
       );

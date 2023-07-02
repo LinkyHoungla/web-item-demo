@@ -89,10 +89,14 @@ export default {
     login() {
       this.$refs.loginFormRel.validate((valid) => {
         if (valid) {
-          this.$store.dispatch("admin/login", this.loginForm).then(() => {
-            this.$router.push("/home");
-            console.log(this.$router);
-          });
+          this.$store
+            .dispatch("admin/login", this.loginForm)
+            .then(() => {
+              this.$router.push("/home");
+            })
+            .catch((error) => {
+              console.log(error);
+            });
         } else {
           console.log("error submit!!");
           return false;
