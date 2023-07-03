@@ -34,11 +34,11 @@
       <!-- 列表区域 -->
       <el-table :data="adminList">
         <el-table-column type="index"></el-table-column>
-        <el-table-column label="用户名" prop="username"></el-table-column>
-        <el-table-column label="角色" prop="role"></el-table-column>
-        <el-table-column label="创建时间" prop="createAt"></el-table-column>
+        <el-table-column label="用户名" prop="fullName"></el-table-column>
+        <el-table-column label="角色" prop="roleId"></el-table-column>
+        <el-table-column label="状态" prop="status"></el-table-column>
         <el-table-column label="上次登录时间" prop="createAt"></el-table-column>
-        <el-table-column label="上次退出时间" prop="createAt"></el-table-column>
+        <el-table-column label="上次退出时间" prop="updateAt"></el-table-column>
         <el-table-column label="操作" width="160px">
           <template slot-scope="scope">
             <!-- 修改按钮 -->
@@ -154,6 +154,7 @@
 </template>
 
 <script>
+import { getAdmins } from "@/api/admin";
 export default {
   name: "Users",
   data() {
@@ -215,13 +216,22 @@ export default {
   },
   methods: {
     // 得到 管理员 列表
-    async getAdminList() {
-      const { data: res } = await this.$http.get("admin/page", {
-        params: this.queryInfo,
-      });
-      if (res.status !== 200) return this.$message.error("获取失败");
-      this.adminList = res.data.array;
-      this.totalNum = res.data.totalNum;
+    // async getAdminList() {
+    //   const { data: res } = await this.$http.get("admin/page", {
+    //     params: this.queryInfo,
+    //   });
+    //   if (res.status !== 200) return this.$message.error("获取失败");
+    //   this.adminList = res.data.array;
+    //   this.totalNum = res.data.totalNum;
+    // },
+    getAdminList() {
+      getAdmins(this.queryInfo)
+        .then((response) => {
+          const { data: res } = response.data;
+          this.adminList = res.list;
+          this.totalNum = res.total;
+        })
+        .catch((error) => error);
     },
     // 监听 pagesize 改变
     handleSizeChange(newSize) {

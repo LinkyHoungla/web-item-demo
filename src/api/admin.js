@@ -1,9 +1,11 @@
 import service from '@/util/request'
 
+// todo: api 整合为全局变量
+
 // 管理员登录
 export function login(data) {
   return service({
-    url: '/login/admin',
+    url: '/admin/login',
     method: 'post',
     data
   })
@@ -12,7 +14,7 @@ export function login(data) {
 // 管理员登出
 export function logout() {
   return service({
-    url: '/logout/admin',
+    url: '/admin/logout',
     method: 'post'
   })
 }
@@ -36,7 +38,7 @@ export function getInfo() {
 // 获取所有管理员信息
 export function getAdmins(pageParam) {
   return service({
-    url: '/admins',
+    url: '/admin/page',
     method: 'get',
     params: pageParam
   })
