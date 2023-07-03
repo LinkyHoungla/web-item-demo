@@ -1,4 +1,4 @@
-import { login, getInfo, logout } from "@/api/admin";
+import { login, getInfo, logout, getMenus } from "@/api/admin";
 import { setToken, getToken, removeToken } from "@/util/auth";
 import router from "@/router";
 
@@ -9,6 +9,7 @@ const getDefaultState = () => {
     name: '',
     avatar: '',
     role: '',
+    menu: '',
   }
 }
 
@@ -29,6 +30,9 @@ const mutations = {
   SET_ROLE: (state, role) => {
     state.role = role
   },
+  SET_MENU: (state, menu) => {
+    state.menu = menu
+  }
 }
 
 // 数据的异步操作
@@ -90,7 +94,31 @@ const actions = {
         reject(error)
       })
     })
-  }
+  },
+  // 获取侧边栏菜单
+  getMenus({ commit, state }) {
+    return new Promise((resolve, reject) => {
+      getMenus().then(
+        response => {
+          console.log(response);
+          const { data } = response.data
+          commit('SET_MENU', data)
+
+          resolve()
+        }).catch(error => {
+          reject(error)
+        })
+    })
+  },
+  // 清除token
+  resetToken({ commit }) {
+    return new Promise(resolve => {
+      commit('SET_TOKEN', '')
+      commit('SET_ROLE', '')
+      removeToken()
+      resolve()
+    })
+  },
 }
 
 export default {

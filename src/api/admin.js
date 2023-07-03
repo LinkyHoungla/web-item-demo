@@ -18,9 +18,9 @@ export function logout() {
 }
 
 // 获取侧边栏菜单
-export function getMenus(username) {
+export function getMenus() {
   return service({
-    url: '/menus/' + username,
+    url: '/menu',
     method: 'get',
   })
 }
@@ -30,5 +30,14 @@ export function getInfo() {
   return service({
     url: '/admin/info',
     method: 'get',
+  })
+}
+
+// 获取所有管理员信息
+export function getAdmins(pageParam) {
+  return service({
+    url: '/admins',
+    method: 'get',
+    params: pageParam
   })
 }

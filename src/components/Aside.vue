@@ -14,9 +14,9 @@
     >
       <!-- 1级菜单 -->
       <el-submenu
-        :index="item.id + ''"
+        :index="item.pageId + ''"
         v-for="item in menusList"
-        :key="item.id"
+        :key="item.pageId"
       >
         <!-- 1级菜单模板区域 -->
         <template slot="title">
@@ -29,8 +29,8 @@
         <!-- 2级菜单 -->
         <el-menu-item
           :index="'/' + subItem.path"
-          v-for="subItem in item.childMenus"
-          :key="subItem.id"
+          v-for="subItem in item.children"
+          :key="subItem.pageId"
         >
           <template slot="title">
             <!-- 图标 -->
@@ -61,17 +61,27 @@ export default {
     },
   },
   created() {
-    // this.getMenuList();
+    this.getMenuList();
   },
   methods: {
     // 获取所有菜单
-    async getMenuList() {
-      console.log(this.$store.getters.username);
-      const { data: res } = await this.$http.get(
-        "menus/" + this.$store.getters.username
-      );
-      if (res.status !== 200) return this.$message.error(res.message);
-      this.menusList = res.data;
+    // async getMenuList() {
+    //   console.log(this.$store.getters.username);
+    //   const { data: res } = await this.$http.get(
+    //     "menus/" + this.$store.getters.username
+    //   );
+    //   if (res.status !== 200) return this.$message.error(res.message);
+    //   this.menusList = res.data;
+    // },
+    getMenuList() {
+      this.$store
+        .dispatch("admin/getMenus")
+        .then(() => {
+          this.menusList = this.$store.getters.menu;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
     // 切换侧边栏菜单折叠
     toggleCollapse() {
