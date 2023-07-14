@@ -34,11 +34,16 @@
       <!-- 列表区域 -->
       <el-table :data="adminList">
         <el-table-column type="index"></el-table-column>
+        <el-table-column label="头像" width="80">
+          <template slot-scope="scope">
+            <el-avatar :src="scope.row.avatar" :size="40"></el-avatar>
+          </template>
+        </el-table-column>
         <el-table-column label="昵称" prop="fullName"></el-table-column>
         <el-table-column label="角色" prop="role.roleName"></el-table-column>
         <el-table-column label="状态" prop="status"></el-table-column>
-        <el-table-column label="上次登录时间" prop="createAt"></el-table-column>
-        <el-table-column label="上次退出时间" prop="updateAt"></el-table-column>
+        <el-table-column label="创建时间" prop="createAt"></el-table-column>
+        <el-table-column label="最近修改" prop="updateAt"></el-table-column>
         <el-table-column label="操作" width="160px">
           <template slot-scope="scope">
             <!-- 修改按钮 -->
