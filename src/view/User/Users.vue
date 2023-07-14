@@ -36,7 +36,14 @@
         <el-table-column type="index"></el-table-column>
         <el-table-column label="头像" width="80">
           <template slot-scope="scope">
-            <el-avatar :src="scope.row.avatar" :size="40"></el-avatar>
+            <el-avatar
+              :src="
+                scope.row.avatar != null
+                  ? 'http://localhost:7777' + scope.row.avatar
+                  : ''
+              "
+              :size="40"
+            ></el-avatar>
           </template>
         </el-table-column>
         <el-table-column label="昵称" prop="fullName"></el-table-column>
