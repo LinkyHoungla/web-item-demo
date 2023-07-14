@@ -43,3 +43,29 @@ export function getAdmins(pageParam) {
     params: pageParam
   })
 }
+
+// 修改管理员信息
+export function updateAdmin(data) {
+  return service({
+    url: '/admin',
+    method: 'put',
+    data
+  })
+}
+
+// 增添管理员
+export function addAdmin(data) {
+  return service({
+    url: '/admin',
+    method: 'post',
+    data
+  })
+}
+
+// 删除管理员
+export function deleteAdmin(uid) {
+  return service({
+    url: '/admin/' + uid,
+    method: 'delete'
+  })
+}

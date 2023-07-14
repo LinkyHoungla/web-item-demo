@@ -52,8 +52,8 @@ service.interceptors.response.use(
         });
       })
     }
-    // return Promise.reject(error)
-    return Promise.resolve()
+    return Promise.reject(error)
+    // return Promise.resolve()
   }
 )
 

@@ -100,7 +100,6 @@ const actions = {
     return new Promise((resolve, reject) => {
       getMenus().then(
         response => {
-          console.log(response);
           const { data } = response.data
           commit('SET_MENU', data)
 

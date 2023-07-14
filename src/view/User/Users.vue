@@ -34,8 +34,8 @@
       <!-- 列表区域 -->
       <el-table :data="adminList">
         <el-table-column type="index"></el-table-column>
-        <el-table-column label="用户名" prop="fullName"></el-table-column>
-        <el-table-column label="角色" prop="roleId"></el-table-column>
+        <el-table-column label="昵称" prop="fullName"></el-table-column>
+        <el-table-column label="角色" prop="role.roleName"></el-table-column>
         <el-table-column label="状态" prop="status"></el-table-column>
         <el-table-column label="上次登录时间" prop="createAt"></el-table-column>
         <el-table-column label="上次退出时间" prop="updateAt"></el-table-column>
@@ -53,7 +53,7 @@
               type="danger"
               icon="el-icon-delete"
               size="mini"
-              @click="removeAdmin(scope.row.account)"
+              @click="removeAdmin(scope.row.adminId)"
             />
           </template>
         </el-table-column>
@@ -85,20 +85,23 @@
         ref="addFormRel"
         label-width="70px"
       >
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="addForm.username"></el-input>
+        <el-form-item label="用户名" prop="adminName">
+          <el-input v-model="addForm.adminName"></el-input>
+        </el-form-item>
+        <el-form-item label="昵称" prop="fullName">
+          <el-input v-model="addForm.fullName"></el-input>
         </el-form-item>
         <el-form-item label="密码" prop="password">
-          <el-input v-model="addForm.password"></el-input>
+          <el-input v-model="addForm.password" type="password"></el-input>
         </el-form-item>
-        <el-form-item label="权限角色" prop="role">
+        <el-form-item label="权限角色" prop="roleId">
           <!-- <el-input v-model="addForm.role"></el-input> -->
-          <el-select v-model="addForm.role">
+          <el-select v-model="addForm.roleId" placeholder="请选择">
             <el-option
               v-for="item in roleList"
               :key="item.roleId"
               :label="item.roleName"
-              :value="item.roleCode"
+              :value="item.roleId"
             ></el-option>
           </el-select>
         </el-form-item>
@@ -120,25 +123,25 @@
     >
       <!-- 内容主题区域 -->
       <el-form
-        :model="editForm"
+        :model="addForm"
         :rules="addFormRules"
         ref="editFormRel"
         label-width="70px"
       >
-        <el-form-item label="ID" prop="account">
-          <el-input v-model="editForm.account" disabled></el-input>
+        <el-form-item label="ID" prop="adminId">
+          <el-input v-model="addForm.adminId" disabled></el-input>
         </el-form-item>
-        <el-form-item label="管理名" prop="username">
-          <el-input v-model="editForm.username"></el-input>
+        <el-form-item label="昵称" prop="fullName">
+          <el-input v-model="addForm.fullName"></el-input>
         </el-form-item>
-        <el-form-item label="权限角色" prop="role">
+        <el-form-item label="权限角色" prop="roleId">
           <!-- <el-input v-model="editForm.role"></el-input> -->
-          <el-select v-model="editForm.role">
+          <el-select v-model="addForm.roleId">
             <el-option
               v-for="item in roleList"
               :key="item.roleId"
               :label="item.roleName"
-              :value="item.roleCode"
+              :value="item.roleId"
             ></el-option>
           </el-select>
         </el-form-item>
@@ -154,21 +157,22 @@
 </template>
 
 <script>
-import { getAdmins } from "@/api/admin";
+import { getAdmins, addAdmin, deleteAdmin, updateAdmin } from "@/api/admin";
+import { getRoleList } from "@/api/role";
 export default {
   name: "Users",
   data() {
     // 自定义 名称 校验规则
     var checkName = async (rule, value, cb) => {
-      const { data: res } = await this.$http.get("admin/sameName", {
-        params: { username: value },
-      });
-      if (
-        res.status === 200 ||
-        (res.status === 201 && value === this.originaName)
-      )
-        return cb();
-      return cb(new Error(res.message));
+      //   const { data: res } = await this.$http.get("admin/sameName", {
+      //     params: { username: value },
+      //   });
+      //   if (
+      //     res.status === 200 ||
+      //     (res.status === 201 && value === this.originaName)
+      //   )
+      return cb();
+      // return cb(new Error(res.message));
     };
 
     return {
@@ -176,7 +180,7 @@ export default {
       queryInfo: {
         query: "",
         pageNum: 0,
-        pageSize: 2,
+        pageSize: 5,
       },
       totalNum: 0,
       adminList: [],
@@ -186,9 +190,12 @@ export default {
       editDialogVisible: false,
       // 添加用户的表单数据
       addForm: {
-        username: "",
+        adminName: "",
         password: "",
-        role: "",
+        roleId: null,
+        fullName: "",
+        avatar: null,
+        status: 0,
       },
       // 修改前的命名
       originaName: "",
@@ -204,10 +211,6 @@ export default {
           { required: true, message: "请输入密码", trigger: "blur" },
           { min: 6, max: 15, message: "用户名长度在6-15之间" },
         ],
-        role: [
-          { required: true, message: "请输入权限", trigger: "blur" },
-          { min: 3, max: 10, message: "权限名长度在3-10之间" },
-        ],
       },
     };
   },
@@ -216,14 +219,6 @@ export default {
   },
   methods: {
     // 得到 管理员 列表
-    // async getAdminList() {
-    //   const { data: res } = await this.$http.get("admin/page", {
-    //     params: this.queryInfo,
-    //   });
-    //   if (res.status !== 200) return this.$message.error("获取失败");
-    //   this.adminList = res.data.array;
-    //   this.totalNum = res.data.totalNum;
-    // },
     getAdminList() {
       getAdmins(this.queryInfo)
         .then((response) => {
@@ -247,38 +242,57 @@ export default {
     addDialogClosed() {
       this.$refs.addFormRel.resetFields();
     },
+    // 表单重置
+    resetAdminForm(temp) {
+      if (temp === null) {
+        this.addForm = {
+          adminName: "",
+          password: "",
+          roleId: null,
+          fullName: "",
+          avatar: null,
+          status: 0,
+        };
+      } else {
+        this.addForm = {
+          adminId: temp.adminId,
+          fullName: temp.fullName,
+          roleId: temp.role.roleId,
+          status: temp.status,
+        };
+      }
+    },
     // 用户添加
     addAdmin() {
-      this.$refs.addFormRel.validate(async (valid) => {
-        if (!valid) return;
-        const { data: res } = await this.$http.post("admin", this.addForm);
-        if (res.status !== 200) this.$message.error("添加失败");
-        this.$message.success("添加成功");
-
-        this.addDialogVisible = false;
-        this.getAdminList();
-      });
+      addAdmin(this.addForm)
+        .then(() => {
+          this.$message.success("添加成功");
+        })
+        .catch(() => {
+          this.$message.error("添加失败");
+        });
+      this.addDialogVisible = false;
+      this.getAdminList();
+    },
+    // 获取所有角色
+    getRoles() {
+      getRoleList()
+        .then((response) => {
+          this.roleList = response.data.data;
+        })
+        .catch();
     },
     // 展示 添加用户 对话框
-    async showAddDialog() {
-      const { data: res } = await this.$http.get("roles");
-      this.roleList = res.data;
-
+    showAddDialog() {
+      this.resetAdminForm(null);
+      this.getRoles();
       this.addDialogVisible = true;
     },
     // 展示 编辑用户 对话框
-    async showEditDialog(temp) {
-      this.editForm = {
-        account: temp.account,
-        username: temp.username,
-        role: temp.role,
-      };
-
+    showEditDialog(temp) {
+      this.resetAdminForm(temp);
       this.originaName = temp.username;
-
-      const { data: res } = await this.$http.get("roles");
-      this.roleList = res.data;
-
+      this.getRoles();
       this.editDialogVisible = true;
     },
     // 监听 修改框 关闭时间
@@ -287,20 +301,18 @@ export default {
     },
     // 用户修改
     editAdmin() {
-      this.$refs.editFormRel.validate(async (valid) => {
+      this.$refs.editFormRel.validate((valid) => {
         if (!valid) return;
-        const { data: res } = await this.$http.put(
-          "admin/" + this.editForm.account,
-          {
-            username: this.editForm.username,
-            role: this.editForm.role,
-          }
-        );
-        if (res.status !== 200) this.$message.error("修改失败");
+        updateAdmin(this.addForm)
+          .then(() => {
+            this.$message.success("修改成功");
+          })
+          .catch((error) => {
+            this.$message.error("修改失败" + error);
+          });
 
         this.editDialogVisible = false;
         this.getAdminList();
-        this.$message.success("修改成功");
       });
     },
     // 根据 id 删除用户
@@ -317,10 +329,15 @@ export default {
       ).catch((err) => err);
 
       if (result !== "confirm") return this.$message.info("已取消删除");
-      const { data: res } = await this.$http.delete("admin/" + id);
+      deleteAdmin(id)
+        .then(() => {
+          this.$message.success("删除成功");
+        })
+        .catch((error) => {
+          console.log(error);
+          this.$message.error("删除失败");
+        });
 
-      if (res.status !== 200) return this.$message.error("删除失败");
-      this.$message.success("删除成功");
       this.getAdminList();
     },
   },
