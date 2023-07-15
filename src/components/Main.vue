@@ -2,12 +2,33 @@
   <el-container class="home-container">
     <!-- 头部 -->
     <el-header>
+      <!-- 左侧 -->
       <div>
         <img src="@/assets/niubi.jpg" alt="" />
         <span>后台管理系统</span>
         <span>{{ loginAdminVo }}</span>
       </div>
-      <el-button type="info" @click="logout">退出</el-button>
+
+      <!-- 右侧 -->
+      <div class="right-menu">
+        <el-dropdown class="avatar-container" trigger="click">
+          <div class="avatar-wrapper">
+            <img
+              :src="'http://localhost:7777' + loginAdminVo.avatar"
+              class="user-avatar"
+            />
+            <i class="el-icon-caret-bottom" />
+          </div>
+          <el-dropdown-menu slot="dropdown" class="user-dropdown">
+            <router-link to="/home">
+              <el-dropdown-item>主页</el-dropdown-item>
+            </router-link>
+            <el-dropdown-item divided @click.native="logout">
+              <span style="display: block">退出</span>
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+      </div>
     </el-header>
     <!-- 页面主题 -->
     <el-container>
@@ -26,7 +47,7 @@
 import Aside from "@/components/Aside.vue";
 
 export default {
-  name: "home",
+  name: "mainApp",
   components: {
     Aside,
   },
@@ -89,6 +110,58 @@ export default {
 
     > span {
       margin-left: 15px;
+    }
+  }
+
+  .right-menu {
+    float: right;
+    height: 100%;
+    // line-height: 50px;
+
+    &:focus {
+      outline: none;
+    }
+
+    .right-menu-item {
+      display: inline-block;
+      padding: 0 8px;
+      height: 100%;
+      font-size: 18px;
+      color: #5a5e66;
+      vertical-align: text-bottom;
+
+      &.hover-effect {
+        cursor: pointer;
+        transition: background 0.3s;
+
+        &:hover {
+          background: rgba(0, 0, 0, 0.025);
+        }
+      }
+    }
+
+    .avatar-container {
+      margin-right: 30px;
+
+      .avatar-wrapper {
+        margin-top: 5px;
+        position: relative;
+
+        .user-avatar {
+          cursor: pointer;
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+        }
+
+        .el-icon-caret-bottom {
+          cursor: pointer;
+          position: absolute;
+          right: -20px;
+          top: 25px;
+          font-size: 12px;
+        }
+      }
     }
   }
 }
