@@ -9,7 +9,10 @@ import Main from '@/components/Main.vue'
 //页面导入
 import NotFound from '@/view/NotFound.vue'
 import Home from '@/view/Home.vue'
+
 import Users from '@/view/User/Users.vue'
+import Info from '@/view/User/Info.vue'
+
 import Rights from '@/view/Power/Rights.vue'
 import Roles from '@/view/Power/Roles.vue'
 
@@ -26,8 +29,9 @@ const router = new VueRouter({
       children: [
         { path: '/home', component: Home },
         { path: '/users', component: Users },
+        { path: '/info', component: Info },
         { path: '/rights', component: Rights },
-        { path: "/roles", component: Roles },
+        { path: '/roles', component: Roles },
       ]
     },
     { path: '/404', component: NotFound },

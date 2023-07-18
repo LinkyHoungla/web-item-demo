@@ -65,14 +65,6 @@ export default {
   },
   methods: {
     // 获取所有菜单
-    // async getMenuList() {
-    //   console.log(this.$store.getters.username);
-    //   const { data: res } = await this.$http.get(
-    //     "menus/" + this.$store.getters.username
-    //   );
-    //   if (res.status !== 200) return this.$message.error(res.message);
-    //   this.menusList = res.data;
-    // },
     getMenuList() {
       this.$store
         .dispatch("admin/getMenus")
@@ -80,7 +72,7 @@ export default {
           this.menusList = this.$store.getters.menu;
         })
         .catch((error) => {
-          console.log(error);
+          this.$message.error("获取失败" + error);
         });
     },
     // 切换侧边栏菜单折叠

@@ -28,6 +28,7 @@
 </template>
 
 <script>
+import { getPageList } from "@/api/right";
 export default {
   name: "rights",
   data() {
@@ -40,10 +41,16 @@ export default {
     this.getRightsList();
   },
   methods: {
-    async getRightsList() {
-      const { data: res } = await this.$http.get("rights/list");
-      if (res.status !== 200) this.$message.error("获取列表失败");
-      this.rightsList = res.data;
+    // 获取 页面 列表
+    getRightsList() {
+      getPageList()
+        .then((response) => {
+          this.rightsList = response.data.data;
+          this.$message.success("获取成功");
+        })
+        .catch(() => {
+          this.$message.error("获取列表失败");
+        });
     },
   },
 };

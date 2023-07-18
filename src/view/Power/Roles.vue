@@ -12,7 +12,7 @@
       <!-- 添加角色列表 -->
       <el-row>
         <el-col>
-          <el-button type="primary" @click="addDialogVisible = true"
+          <el-button type="primary" @click="openAddDialog(null)"
             >添加角色</el-button
           >
         </el-col>
@@ -20,6 +20,7 @@
 
       <!-- 角色列表 -->
       <el-table :data="rolesList" border stripe>
+        <el-table-column type="expand" />
         <el-table-column type="index" />
         <el-table-column label="角色代码" prop="roleCode" />
         <el-table-column label="角色名称" prop="roleName" />
@@ -118,6 +119,8 @@
 </template>
 
 <script>
+import { getRoleList, updateRole, deleteRole, addRole } from "@/api/role";
+
 export default {
   name: "roles",
   data() {
@@ -157,23 +160,28 @@ export default {
   },
   methods: {
     // 获取 权限角色 列表
-    async getRolesList() {
-      const { data: res } = await this.$http.get("/roles");
-      if (res.status !== 200) return this.$message.error(res.message);
-      this.rolesList = res.data;
+    getRolesList() {
+      getRoleList()
+        .then((response) => {
+          this.rolesList = response.data.data;
+        })
+        .catch(() => {
+          this.$message.error("获取列表失败");
+        });
     },
-    // 修改 当前角色 信息
-    async editRole() {
+    // 编辑 权限角色 信息
+    editRole() {
       this.$refs.editFormRel.validate(async (valid) => {
         if (!valid) return;
-        const { data: res } = await this.$http.put(
-          "roles/" + this.role.roleId,
-          this.role
-        );
-        if (res.status !== 200) this.$message.error("修改失败");
-        this.editDialogVisible = false;
+        updateRole(this.role)
+          .then(() => {
+            this.$message.success("修改成功");
+          })
+          .catch(() => {
+            this.$message.error("修改失败");
+          });
 
-        this.$message.success("修改成功");
+        this.editDialogVisible = false;
         this.getRolesList();
       });
     },
@@ -191,23 +199,27 @@ export default {
       ).catch((err) => err);
 
       if (result !== "confirm") return this.$message.info("已取消删除");
-      const { data: res } = await this.$http.delete("roles/" + id);
-
-      if (res.status !== 200) return this.$message.error("删除失败");
-      this.$message.success("删除成功");
-      this.getRolesList();
+      deleteRole(id)
+        .then(() => {
+          this.$message.success("删除成功");
+          this.getRolesList();
+        })
+        .catch(() => {
+          this.$message.error("删除失败");
+        });
     },
     // 添加 当前角色 信息
-    async addRole() {
-      this.$refs.addFormRel.validate(async (valid) => {
-        if (!valid) return;
-        const { data: res } = await this.$http.post("roles", this.role);
-        if (res.status !== 200) this.$message.error("添加失败");
-        this.$message.success("添加成功");
+    addRole() {
+      addRole(this.role)
+        .then(() => {
+          this.$message.success("添加成功");
+        })
+        .catch(() => {
+          this.$message.error("添加失败");
+        });
 
-        this.addDialogVisible = false;
-        this.getRolesList();
-      });
+      this.addDialogVisible = false;
+      this.getRolesList();
     },
     // 窗口 操作 关闭
     addDialogClosed() {
@@ -217,9 +229,28 @@ export default {
     editDialogClosed() {
       this.$refs.editFormRel.resetFields();
     },
+    // 编辑 窗口 打开
     openEditDialog(temp) {
-      this.role = temp;
+      this.resetForm(temp);
       this.editDialogVisible = true;
+    },
+    // 添加 窗口 打开
+    openAddDialog(temp) {
+      this.resetForm(temp);
+      this.addDialogVisible = true;
+    },
+    // 表单 重置
+    resetForm(temp) {
+      if (temp !== null) {
+        this.role = temp;
+      } else {
+        this.role = {
+          roleId: null,
+          roleCode: "",
+          roleName: "",
+          roleDesc: "",
+        };
+      }
     },
   },
 };

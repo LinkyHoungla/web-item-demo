@@ -23,6 +23,9 @@
             <router-link to="/home">
               <el-dropdown-item>主页</el-dropdown-item>
             </router-link>
+            <router-link to="/home">
+              <el-dropdown-item>信息修改</el-dropdown-item>
+            </router-link>
             <el-dropdown-item divided @click.native="logout">
               <span style="display: block">退出</span>
             </el-dropdown-item>
@@ -81,7 +84,9 @@ export default {
           this.loginAdminVo.name = this.$store.getters.name;
           this.loginAdminVo.avatar = this.$store.getters.avatar;
         })
-        .catch((error) => {});
+        .catch(() => {
+          this.$message.error("获取失败");
+        });
     },
   },
 };

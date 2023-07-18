@@ -103,9 +103,6 @@
         <el-form-item label="昵称" prop="fullName">
           <el-input v-model="addForm.fullName"></el-input>
         </el-form-item>
-        <el-form-item label="密码" prop="password">
-          <el-input v-model="addForm.password" type="password"></el-input>
-        </el-form-item>
         <el-form-item label="权限角色" prop="roleId">
           <!-- <el-input v-model="addForm.role"></el-input> -->
           <el-select v-model="addForm.roleId" placeholder="请选择">
@@ -203,11 +200,8 @@ export default {
       // 添加用户的表单数据
       addForm: {
         adminName: "",
-        password: "",
         roleId: null,
         fullName: "",
-        avatar: null,
-        status: 0,
       },
       // 修改前的命名
       originaName: "",
@@ -238,7 +232,9 @@ export default {
           this.adminList = res.list;
           this.totalNum = res.total;
         })
-        .catch((error) => error);
+        .catch(() => {
+          this.$message.error("获取列表失败");
+        });
     },
     // 监听 pagesize 改变
     handleSizeChange(newSize) {
@@ -292,7 +288,9 @@ export default {
         .then((response) => {
           this.roleList = response.data.data;
         })
-        .catch();
+        .catch(() => {
+          this.$message.error("获取角色失败");
+        });
     },
     // 展示 添加用户 对话框
     showAddDialog() {
@@ -344,13 +342,12 @@ export default {
       deleteAdmin(id)
         .then(() => {
           this.$message.success("删除成功");
+          this.getAdminList();
         })
         .catch((error) => {
           console.log(error);
           this.$message.error("删除失败");
         });
-
-      this.getAdminList();
     },
   },
 };

@@ -1,6 +1,6 @@
-import { login, getInfo, logout, getMenus } from "@/api/admin";
+import { login, getInfo, logout } from "@/api/admin";
+import { getMenus } from "@/api/right";
 import { setToken, getToken, removeToken } from "@/util/auth";
-import router from "@/router";
 
 // 在需要重置状态时使用 getDefaultState() 函数来恢复初始值
 const getDefaultState = () => {
@@ -96,7 +96,7 @@ const actions = {
     })
   },
   // 获取侧边栏菜单
-  getMenus({ commit, state }) {
+  getMenus({ commit }) {
     return new Promise((resolve, reject) => {
       getMenus().then(
         response => {

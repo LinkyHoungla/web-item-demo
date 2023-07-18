@@ -19,14 +19,6 @@ export function logout() {
   })
 }
 
-// 获取侧边栏菜单
-export function getMenus() {
-  return service({
-    url: '/menu',
-    method: 'get',
-  })
-}
-
 // 获取当前登录管理员信息
 export function getInfo() {
   return service({
