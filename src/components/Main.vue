@@ -71,9 +71,14 @@ export default {
     // 退出登录
     logout() {
       // window.sessionStorage.clear();
-      this.$store.dispatch("admin/logout").then(() => {
-        this.$router.push("/login");
-      });
+      this.$store
+        .dispatch("admin/logout")
+        .then(() => {
+          this.$router.push("/login");
+        })
+        .catch((error) => {
+          this.$message.error(error);
+        });
     },
     // 获取当前登录者信息
     getLoginAdminVo() {
