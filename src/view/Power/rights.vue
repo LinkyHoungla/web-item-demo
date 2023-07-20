@@ -34,53 +34,50 @@
       </el-row>
 
       <!-- 权限列表 -->
-      <el-table :data="rightsList" border stripe>
-        <el-table-column type="index" />
-        <el-table-column label="名称" prop="name" />
-        <el-table-column label="路径" prop="path" />
-        <el-table-column label="等级" prop="level">
-          <template slot-scope="scope">
-            <el-tag v-if="scope.row.level === 1">一级</el-tag>
-            <el-tag v-else-if="scope.row.level === 2" type="warning"
-              >二级</el-tag
-            >
-            <el-tag v-else type="success">三级</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="300px">
-          <template slot-scope="scope">
-            <!-- 添加按钮 -->
-            <el-button
-              v-if="scope.row.level != 3"
-              type="warning"
-              icon="el-icon-setting"
-              size="mini"
-              @click="showAddDialog(scope.row)"
-            />
-            <!-- 修改按钮 -->
-            <el-button
-              type="primary"
-              icon="el-icon-edit"
-              size="mini"
-              @click="showEditDialog(scope.row)"
-            />
-            <!-- 删除按钮 -->
-            <el-button
-              type="danger"
-              icon="el-icon-delete"
-              size="mini"
-              @click="deletRight(scope.row.pageId)"
-            />
-          </template>
-        </el-table-column>
-      </el-table>
+      <tree-table
+        :data="rightsList"
+        :columns="columns"
+        :selection-type="false"
+        :expand-type="false"
+        show-index
+        border
+      >
+        <template slot="order" slot-scope="scope">
+          <el-tag v-if="scope.row.level === 1" size="mini">一级</el-tag>
+          <el-tag v-if="scope.row.level === 2" type="warning" size="mini"
+            >二级</el-tag
+          >
+          <el-tag v-if="scope.row.level === 3" type="success" size="mini"
+            >三级</el-tag
+          >
+        </template>
+        <!-- 排序 -->
+        <template slot="operate" slot-scope="scope">
+          <!-- 修改按钮 -->
+          <el-button
+            type="primary"
+            icon="el-icon-edit"
+            size="mini"
+            @click="showEditDialog(scope.row)"
+            >修改</el-button
+          >
+          <!-- 删除按钮 -->
+          <el-button
+            type="danger"
+            icon="el-icon-delete"
+            size="mini"
+            @click="deletRight(scope.row.pageId)"
+            >删除</el-button
+          >
+        </template>
+      </tree-table>
 
       <!-- 分页区域 -->
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="queryInfo.pageNum"
-        :page-sizes="[10, 20]"
+        :page-sizes="[5, 10]"
         :page-size="queryInfo.pageSize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="totalNum"
@@ -96,21 +93,22 @@
     >
       <!-- 内容主题区域 -->
       <el-form :model="rightForm" ref="addFormRel" label-width="70px">
-        <el-form-item label="页面等级" prop="level">
-          <el-input v-model="rightForm.level" disabled />
-        </el-form-item>
-        <el-form-item
-          v-if="rightForm.level != 1"
-          label="父页面"
-          prop="parentId"
-        >
-          <el-input v-model="rightForm.parentId" disabled />
-        </el-form-item>
         <el-form-item label="页面名称" prop="name">
           <el-input v-model="rightForm.name" />
         </el-form-item>
         <el-form-item label="页面路径" prop="path">
           <el-input v-model="rightForm.path" />
+        </el-form-item>
+        <el-form-item label="父级页面">
+          <el-cascader
+            expand-trigger="hover"
+            :options="rightsTree"
+            :props="cascaderProps"
+            v-model="selectedKeys"
+            clearable
+            change-on-select
+            @change="parentIdChange"
+          />
         </el-form-item>
       </el-form>
 
@@ -151,7 +149,13 @@
 </template>
 
 <script>
-import { getPageList, addRight, deletePage, updatePage } from "@/api/right";
+import {
+  getPageList,
+  addRight,
+  deletePage,
+  updatePage,
+  getPageTree,
+} from "@/api/right";
 export default {
   name: "rights",
   data() {
@@ -160,7 +164,7 @@ export default {
       queryInfo: {
         query: "",
         pageNum: 0,
-        pageSize: 10,
+        pageSize: 5,
       },
       totalNum: 0,
 
@@ -168,8 +172,39 @@ export default {
       addDialogVisible: false,
       editDialogVisible: false,
 
+      // 表格列
+      columns: [
+        {
+          label: "页面名称",
+          prop: "name",
+        },
+        {
+          label: "页面路径",
+          prop: "path",
+        },
+        {
+          label: "页面等级",
+          type: "template",
+          template: "order",
+        },
+        {
+          label: "操作",
+          type: "template",
+          template: "operate",
+        },
+      ],
+      // 级联选择设置
+      cascaderProps: {
+        value: "pageId",
+        label: "name",
+        children: "children",
+      },
+      // 所有的权限树
+      rightsTree: [],
       // 所有的权限列表
       rightsList: [],
+      // 选择项
+      selectedKeys: [],
       // 权限 表单
       rightForm: {
         parentId: null,
@@ -214,6 +249,7 @@ export default {
           parentId: temp.pageId,
           level: temp.level + 1,
         };
+      this.getPageTree(2);
       this.addDialogVisible = true;
     },
     // 展示 编辑 对话框
@@ -227,10 +263,27 @@ export default {
     },
     // 监听 添加框 关闭
     addDialogClosed() {
+      this.selectedKeys = [];
       this.$refs.addFormRel.resetFields();
+    },
+    // 监听 级联选择器
+    parentIdChange() {
+      this.rightForm.level = this.selectedKeys.length + 1;
+      if (this.rightForm.level > 1)
+        this.rightForm.parentId = this.selectedKeys[this.rightForm.level - 2];
     },
 
     // 网络请求
+    // 获取 权限 树
+    getPageTree(level) {
+      getPageTree(level)
+        .then((response) => {
+          this.rightsTree = response.data.data;
+        })
+        .catch(() => {
+          this.$message.error("获取失败");
+        });
+    },
     // 获取 页面 列表
     getRightsList() {
       getPageList(this.queryInfo)

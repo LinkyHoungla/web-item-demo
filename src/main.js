@@ -15,6 +15,10 @@ import ElementUI from 'element-ui'
 import '@/plugins/element.js'
 Vue.use(ElementUI)
 
+// tree 导入
+import TreeTable from 'vue-table-with-tree-grid'
+Vue.component('tree-table', TreeTable)
+
 //axios 导入
 import axios from 'axios'
 

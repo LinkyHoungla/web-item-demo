@@ -18,10 +18,11 @@ export function getPageList(pageParam) {
 }
 
 // 获取 路径 树
-export function getPageTree() {
+export function getPageTree(level) {
   return service({
     url: '/page/tree',
     method: 'get',
+    params: { level }
   })
 }
 
