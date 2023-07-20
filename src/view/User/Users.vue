@@ -305,7 +305,7 @@ export default {
       this.getRoles();
       this.editDialogVisible = true;
     },
-    // 监听 修改框 关闭时间
+    // 监听 修改框 关闭
     editDialogClosed() {
       this.$refs.editFormRel.resetFields();
     },
@@ -344,8 +344,7 @@ export default {
           this.$message.success("删除成功");
           this.getAdminList();
         })
-        .catch((error) => {
-          console.log(error);
+        .catch(() => {
           this.$message.error("删除失败");
         });
     },

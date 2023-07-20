@@ -9,6 +9,31 @@
 
     <!-- 卡牌视图 -->
     <el-card>
+      <!-- 收索区域 -->
+      <el-row :gutter="20">
+        <el-col :span="10">
+          <!-- 搜索框 -->
+          <el-input
+            placeholder="请输入内容"
+            v-model="queryInfo.query"
+            clearable
+            @clear="getRightsList"
+          >
+            <el-button
+              slot="append"
+              icon="el-icon-search"
+              @click="getRightsList"
+            />
+          </el-input>
+        </el-col>
+        <el-col :span="4">
+          <el-button type="primary" @click="showAddDialog(null)"
+            >添加权限</el-button
+          >
+        </el-col>
+      </el-row>
+
+      <!-- 权限列表 -->
       <el-table :data="rightsList" border stripe>
         <el-table-column type="index" />
         <el-table-column label="名称" prop="name" />
@@ -22,34 +47,248 @@
             <el-tag v-else type="success">三级</el-tag>
           </template>
         </el-table-column>
+        <el-table-column label="操作" width="300px">
+          <template slot-scope="scope">
+            <!-- 添加按钮 -->
+            <el-button
+              v-if="scope.row.level != 3"
+              type="warning"
+              icon="el-icon-setting"
+              size="mini"
+              @click="showAddDialog(scope.row)"
+            />
+            <!-- 修改按钮 -->
+            <el-button
+              type="primary"
+              icon="el-icon-edit"
+              size="mini"
+              @click="showEditDialog(scope.row)"
+            />
+            <!-- 删除按钮 -->
+            <el-button
+              type="danger"
+              icon="el-icon-delete"
+              size="mini"
+              @click="deletRight(scope.row.pageId)"
+            />
+          </template>
+        </el-table-column>
       </el-table>
+
+      <!-- 分页区域 -->
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="queryInfo.pageNum"
+        :page-sizes="[10, 20]"
+        :page-size="queryInfo.pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="totalNum"
+      ></el-pagination>
     </el-card>
+
+    <!-- 添加 对话框 -->
+    <el-dialog
+      title="添加页面"
+      :visible.sync="addDialogVisible"
+      width="50%"
+      @close="addDialogClosed"
+    >
+      <!-- 内容主题区域 -->
+      <el-form :model="rightForm" ref="addFormRel" label-width="70px">
+        <el-form-item label="页面等级" prop="level">
+          <el-input v-model="rightForm.level" disabled />
+        </el-form-item>
+        <el-form-item
+          v-if="rightForm.level != 1"
+          label="父页面"
+          prop="parentId"
+        >
+          <el-input v-model="rightForm.parentId" disabled />
+        </el-form-item>
+        <el-form-item label="页面名称" prop="name">
+          <el-input v-model="rightForm.name" />
+        </el-form-item>
+        <el-form-item label="页面路径" prop="path">
+          <el-input v-model="rightForm.path" />
+        </el-form-item>
+      </el-form>
+
+      <!-- 底部区域 -->
+      <span slot="footer" class="dialog=footer">
+        <el-button @click="addDialogVisible = false">取消</el-button>
+        <el-button @click="addRight">确定</el-button>
+      </span>
+    </el-dialog>
+
+    <!-- 用户修改对话框 -->
+    <el-dialog
+      title="修改用户"
+      :visible.sync="editDialogVisible"
+      width="50%"
+      @close="editDialogClosed"
+    >
+      <!-- 内容主题区域 -->
+      <el-form :model="rightForm" ref="editFormRel" label-width="70px">
+        <el-form-item label="ID" prop="pageId">
+          <el-input v-model="rightForm.pageId" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="页面名称" prop="name">
+          <el-input v-model="rightForm.name"></el-input>
+        </el-form-item>
+        <el-form-item label="页面路径" prop="path">
+          <el-input v-model="rightForm.path"></el-input>
+        </el-form-item>
+      </el-form>
+
+      <!-- 底部区域 -->
+      <span slot="footer" class="dialog=footer">
+        <el-button @click="editDialogVisible = false">取消</el-button>
+        <el-button @click="editRight">确定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getPageList } from "@/api/right";
+import { getPageList, addRight, deletePage, updatePage } from "@/api/right";
 export default {
   name: "rights",
   data() {
     return {
+      // 获取权限列表的参数对象
+      queryInfo: {
+        query: "",
+        pageNum: 0,
+        pageSize: 10,
+      },
+      totalNum: 0,
+
+      // 对话框显示
+      addDialogVisible: false,
+      editDialogVisible: false,
+
       // 所有的权限列表
       rightsList: [],
+      // 权限 表单
+      rightForm: {
+        parentId: null,
+        name: "",
+        path: "",
+        level: null,
+      },
+      // 当前 id
+      selectPage: null,
     };
   },
   created() {
     this.getRightsList();
   },
   methods: {
+    // 页面
+    // 监听 pagesize 改变
+    handleSizeChange(newSize) {
+      this.queryInfo.pageSize = newSize;
+      this.getRightsList();
+    },
+    // 监听 页码值 改变
+    handleCurrentChange(newPage) {
+      this.queryInfo.pageNum = newPage;
+      this.getRightsList();
+    },
+
+    // 对话框
+    // 展示 添加 对话框
+    showAddDialog(temp) {
+      if (temp === null)
+        this.rightForm = {
+          name: "",
+          path: "",
+          parentId: -1,
+          level: 1,
+        };
+      else
+        this.rightForm = {
+          name: "",
+          path: "",
+          parentId: temp.pageId,
+          level: temp.level + 1,
+        };
+      this.addDialogVisible = true;
+    },
+    // 展示 编辑 对话框
+    showEditDialog(temp) {
+      this.rightForm = temp;
+      this.editDialogVisible = true;
+    },
+    // 监听 修改框 关闭
+    editDialogClosed() {
+      this.$refs.editFormRel.resetFields();
+    },
+    // 监听 添加框 关闭
+    addDialogClosed() {
+      this.$refs.addFormRel.resetFields();
+    },
+
+    // 网络请求
     // 获取 页面 列表
     getRightsList() {
-      getPageList()
+      getPageList(this.queryInfo)
         .then((response) => {
-          this.rightsList = response.data.data;
+          const { data: res } = response.data;
+          this.rightsList = res.list;
+          this.totalNum = res.total;
           this.$message.success("获取成功");
         })
         .catch(() => {
           this.$message.error("获取列表失败");
+        });
+    },
+    // 添加 权限
+    addRight() {
+      addRight(this.rightForm)
+        .then(() => {
+          this.$message.success("添加成功");
+          this.getRightsList();
+        })
+        .catch(() => {
+          this.$message.error("添加失败");
+        });
+      this.addDialogVisible = false;
+    },
+    // 修改权限
+    editRight() {
+      updatePage(this.rightForm)
+        .then(() => {
+          this.$message.success("修改成功");
+          this.getRightsList();
+        })
+        .catch(() => {
+          this.$message.error("修改失败");
+        });
+      this.editDialogVisible = false;
+    },
+    // 删除权限
+    async deletRight(id) {
+      // 确认返回 confirm，取消返回 cancel
+      const result = await this.$confirm(
+        "此操作将永久删除该页面，是否继续",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        }
+      ).catch((err) => err);
+
+      if (result !== "confirm") return this.$message.info("已取消删除");
+      deletePage(id)
+        .then(() => {
+          this.$message.success("删除成功");
+          this.getRightsList();
+        })
+        .catch(() => {
+          this.$message.error("删除失败");
         });
     },
   },

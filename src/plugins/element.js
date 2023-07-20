@@ -1,6 +1,6 @@
 import Vue from 'vue'
 
-import { Form, FormItem, Input, Button, Message, Container, Header, Aside, Main, Menu, Submenu, MenuItem, Breadcrumb, BreadcrumbItem, Card, Row, Col, Table, TableColumn, Pagination, Dialog, MessageBox, Tag } from 'element-ui'
+import { Form, FormItem, Input, Button, Message, Container, Header, Aside, Main, Menu, Submenu, MenuItem, Breadcrumb, BreadcrumbItem, Card, Row, Col, Table, TableColumn, Pagination, Dialog, MessageBox, Tag, Tree } from 'element-ui'
 
 // 表单
 Vue.use(Form)
@@ -43,6 +43,9 @@ Vue.use(Dialog)
 
 // 标签
 Vue.use(Tag)
+
+// 树形结构
+Vue.use(Tree)
 
 // 弹出栏
 Vue.prototype.$confirm = MessageBox.confirm
