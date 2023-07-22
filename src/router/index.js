@@ -10,6 +10,7 @@ import Main from '@/components/Main.vue'
 import NotFound from '@/view/NotFound.vue'
 import Home from '@/view/Home.vue'
 
+import Admins from '@/view/User/Admins.vue'
 import Users from '@/view/User/Users.vue'
 import Info from '@/view/User/Info.vue'
 
@@ -28,6 +29,7 @@ const router = new VueRouter({
       redirect: "/home",
       children: [
         { path: '/home', component: Home },
+        { path: '/admins', component: Admins },
         { path: '/users', component: Users },
         { path: '/info', component: Info },
         { path: '/rights', component: Rights },

@@ -22,6 +22,10 @@ Vue.component('tree-table', TreeTable)
 //axios 导入
 import axios from 'axios'
 
+// 自定义 组件
+import FormDialog from '@/components/Dialog/FormDialog.vue'
+Vue.component('form-dialog', FormDialog)
+
 import store from './store'
 //配置请求路径
 // axios.defaults.baseURL = 'http://localhost:8080/'

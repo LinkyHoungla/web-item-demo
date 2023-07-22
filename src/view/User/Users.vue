@@ -3,8 +3,8 @@
     <!-- 面包屑导航 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>活动管理</el-breadcrumb-item>
-      <el-breadcrumb-item>活动列表</el-breadcrumb-item>
+      <el-breadcrumb-item>用户管理</el-breadcrumb-item>
+      <el-breadcrumb-item>用户列表</el-breadcrumb-item>
     </el-breadcrumb>
 
     <!-- 卡片视图 -->
@@ -17,12 +17,12 @@
             placeholder="请输入内容"
             v-model="queryInfo.query"
             clearable
-            @clear="getAdminList"
+            @clear="getUserList"
           >
             <el-button
               slot="append"
               icon="el-icon-search"
-              @click="getAdminList"
+              @click="getUserList"
             />
           </el-input>
         </el-col>
@@ -32,27 +32,73 @@
       </el-row>
 
       <!-- 列表区域 -->
-      <el-table :data="adminList">
-        <el-table-column type="index"></el-table-column>
-        <el-table-column label="头像" width="80">
-          <template slot-scope="scope">
-            <el-avatar
-              :src="
-                scope.row.avatar != null
-                  ? 'http://localhost:7777' + scope.row.avatar
-                  : ''
-              "
-              :size="40"
-            ></el-avatar>
+      <el-table
+        :data="userList"
+        :row-key="(row) => row.uid"
+        :expand-row-keys="expandRowKeys"
+        @expand-change="handleExpandChange"
+      >
+        <el-table-column type="expand">
+          <template>
+            <!-- 展开行的内容 -->
+            <el-table :data="userInfo">
+              <el-table-column label="昵称" prop="nickname" />
+              <el-table-column label="头像" prop="avatar" />
+              <el-table-column label="性别" prop="gender" />
+              <el-table-column label="年龄" prop="age" />
+              <el-table-column label="生日" prop="birthday"></el-table-column>
+              <el-table-column label="地址" prop="location" />
+              <el-table-column label="最近修改" prop="updateTime" />
+              <el-table-column label="操作" width="160px">
+                <template slot-scope="scope">
+                  <!-- 修改按钮 -->
+                  <el-button
+                    type="primary"
+                    icon="el-icon-edit"
+                    size="mini"
+                    @click="updateUserInfoDialog(scope.row.uid)"
+                  />
+                </template>
+              </el-table-column>
+            </el-table>
+            <!-- 展开行的内容 -->
+            <el-table :data="userLogin">
+              <el-table-column label="账号名" prop="username" />
+              <el-table-column label="密码" prop="password" />
+              <el-table-column label="IP" prop="ip" />
+              <el-table-column label="最近登录" prop="loginTime" />
+              <el-table-column label="操作" width="300px">
+                <template slot-scope="scope">
+                  <!-- 登录测试 按钮 -->
+                  <el-button
+                    icon="el-icon-setting"
+                    size="mini"
+                    @click="userlogin(scope.row)"
+                    >登录测试</el-button
+                  >
+                  <!-- 修改按钮 -->
+                  <el-button
+                    type="primary"
+                    icon="el-icon-edit"
+                    size="mini"
+                    @click="updateUserLoginDialog(scope.row.uid)"
+                    >修改信息</el-button
+                  >
+                </template>
+              </el-table-column>
+            </el-table>
           </template>
         </el-table-column>
-        <el-table-column label="昵称" prop="fullName"></el-table-column>
-        <el-table-column label="角色" prop="role.roleName"></el-table-column>
+        <el-table-column type="index"></el-table-column>
+        <el-table-column label="UID" prop="uid" />
+        <el-table-column label="微信ID" prop="wxid" />
+        <el-table-column label="钱包ID" prop="walletId" />
+        <el-table-column label="手机" prop="phone" />
         <el-table-column label="状态" prop="status"></el-table-column>
-        <el-table-column label="创建时间" prop="createAt"></el-table-column>
-        <el-table-column label="最近修改" prop="updateAt"></el-table-column>
+        <el-table-column label="创建时间" prop="createTime" />
+        <el-table-column label="最近修改" prop="updateTime" />
         <el-table-column label="操作" width="160px">
-          <template slot-scope="scope">
+          <template>
             <!-- 修改按钮 -->
             <el-button
               type="primary"
@@ -65,7 +111,7 @@
               type="danger"
               icon="el-icon-delete"
               size="mini"
-              @click="removeAdmin(scope.row.adminId)"
+              @click="deleteUser(scope.row.uid)"
             />
           </template>
         </el-table-column>
@@ -91,35 +137,19 @@
       @close="addDialogClosed"
     >
       <!-- 内容主题区域 -->
-      <el-form
-        :model="addForm"
-        :rules="addFormRules"
-        ref="addFormRel"
-        label-width="70px"
-      >
-        <el-form-item label="用户名" prop="adminName">
-          <el-input v-model="addForm.adminName"></el-input>
+      <el-form :model="basciForm" ref="addFormRel" label-width="70px">
+        <el-form-item label="手机" prop="phone">
+          <el-input v-model="basciForm.phone"></el-input>
         </el-form-item>
-        <el-form-item label="昵称" prop="fullName">
-          <el-input v-model="addForm.fullName"></el-input>
-        </el-form-item>
-        <el-form-item label="权限角色" prop="roleId">
-          <!-- <el-input v-model="addForm.role"></el-input> -->
-          <el-select v-model="addForm.roleId" placeholder="请选择">
-            <el-option
-              v-for="item in roleList"
-              :key="item.roleId"
-              :label="item.roleName"
-              :value="item.roleId"
-            ></el-option>
-          </el-select>
+        <el-form-item label="微信号" prop="wxid">
+          <el-input v-model="basciForm.wxid"></el-input>
         </el-form-item>
       </el-form>
 
       <!-- 底部区域 -->
       <span slot="footer" class="dialog=footer">
         <el-button @click="addDialogVisible = false">取消</el-button>
-        <el-button @click="addAdmin">确定</el-button>
+        <el-button @click="addUser">确定</el-button>
       </span>
     </el-dialog>
 
@@ -131,59 +161,48 @@
       @close="editDialogClosed"
     >
       <!-- 内容主题区域 -->
-      <el-form
-        :model="addForm"
-        :rules="addFormRules"
-        ref="editFormRel"
-        label-width="70px"
-      >
-        <el-form-item label="ID" prop="adminId">
-          <el-input v-model="addForm.adminId" disabled></el-input>
-        </el-form-item>
-        <el-form-item label="昵称" prop="fullName">
-          <el-input v-model="addForm.fullName"></el-input>
-        </el-form-item>
-        <el-form-item label="权限角色" prop="roleId">
-          <!-- <el-input v-model="editForm.role"></el-input> -->
-          <el-select v-model="addForm.roleId">
-            <el-option
-              v-for="item in roleList"
-              :key="item.roleId"
-              :label="item.roleName"
-              :value="item.roleId"
-            ></el-option>
-          </el-select>
+      <el-form :model="editForm" ref="editFormRel" label-width="70px">
+        <el-form-item label="手机号码" prop="phone">
+          <el-input v-model="editForm.phone" />
         </el-form-item>
       </el-form>
 
       <!-- 底部区域 -->
       <span slot="footer" class="dialog=footer">
         <el-button @click="editDialogVisible = false">取消</el-button>
-        <el-button @click="editAdmin">确定</el-button>
+        <el-button @click="updateUserPhone">确定</el-button>
       </span>
     </el-dialog>
+
+    <!-- 表单框 -->
+    <form-dialog
+      :visible.sync="formDialogVisible"
+      :dialogTitle="formDialogTitle"
+      width="50%"
+      :fields="formFields"
+      :formData="form"
+      formRef="editFormRef"
+      @submit="updateUserInfo"
+    />
   </div>
 </template>
 
 <script>
-import { getAdmins, addAdmin, deleteAdmin, updateAdmin } from "@/api/admin";
-import { getRoleList } from "@/api/role";
+import {
+  updateUserPhone,
+  getUserList,
+  addUser,
+  deleteUser,
+  getUserInfo,
+  updateUserInfo,
+  updateUserLogin,
+  getUserLogin,
+  userLogin,
+} from "@/api/user";
+
 export default {
   name: "Users",
   data() {
-    // 自定义 名称 校验规则
-    var checkName = async (rule, value, cb) => {
-      //   const { data: res } = await this.$http.get("admin/sameName", {
-      //     params: { username: value },
-      //   });
-      //   if (
-      //     res.status === 200 ||
-      //     (res.status === 201 && value === this.originaName)
-      //   )
-      return cb();
-      // return cb(new Error(res.message));
-    };
-
     return {
       // 获取用户列表的参数对象
       queryInfo: {
@@ -192,142 +211,204 @@ export default {
         pageSize: 5,
       },
       totalNum: 0,
-      adminList: [],
-      roleList: [],
-      // 对话框显示
+
+      // 展开行
+      expandRowKeys: [],
+
+      // 用户数据
+      // 用户 列表
+      userList: [],
+      // 用户 个人信息
+      userInfo: [],
+      userLogin: [],
+
+      // 表单数据
+      updateId: null,
+      editForm: { phone: "" },
+      basciForm: {
+        phone: "",
+        wxid: "",
+      },
+
+      // 表单窗口
+      formDialogTitle: "",
+      formDialogVisible: false,
+      formFields: [],
+      form: {},
+
+      // 窗口属性
       addDialogVisible: false,
       editDialogVisible: false,
-      // 添加用户的表单数据
-      addForm: {
-        adminName: "",
-        roleId: null,
-        fullName: "",
-      },
-      // 修改前的命名
-      originaName: "",
-      // 修改用户的表单数据
-      editForm: {},
-      // 添加表单的验证规则对象
-      addFormRules: {
-        username: [
-          { required: true, message: "请输入用户名", trigger: "blur" },
-          { validator: checkName, trigger: "blur" },
-        ],
-        password: [
-          { required: true, message: "请输入密码", trigger: "blur" },
-          { min: 6, max: 15, message: "用户名长度在6-15之间" },
-        ],
-      },
     };
   },
   created() {
-    this.getAdminList();
+    this.getUserList();
   },
   methods: {
-    // 得到 管理员 列表
-    getAdminList() {
-      getAdmins(this.queryInfo)
-        .then((response) => {
-          const { data: res } = response.data;
-          this.adminList = res.list;
-          this.totalNum = res.total;
-        })
-        .catch(() => {
-          this.$message.error("获取列表失败");
-        });
-    },
+    // 监听
     // 监听 pagesize 改变
     handleSizeChange(newSize) {
       this.queryInfo.pageSize = newSize;
-      this.getAdminList();
+      this.getUserList();
     },
     // 监听 页码值 改变
     handleCurrentChange(newPage) {
       this.queryInfo.pageNum = newPage;
-      this.getAdminList();
+      this.getUserList();
     },
-    // 监听 用户添加框 关闭事件
-    addDialogClosed() {
-      this.$refs.addFormRel.resetFields();
-    },
-    // 表单重置
-    resetAdminForm(temp) {
-      if (temp === null) {
-        this.addForm = {
-          adminName: "",
-          password: "",
-          roleId: null,
-          fullName: "",
-          avatar: null,
-          status: 0,
-        };
+    // 监听 展开行
+    handleExpandChange(row) {
+      if (row && this.expandRowKeys.indexOf(row.uid)) {
+        this.expandRowKeys = [row.uid];
+        this.getUserInfo(row.uid);
+        this.getUserLogin(row.uid);
       } else {
-        this.addForm = {
-          adminId: temp.adminId,
-          fullName: temp.fullName,
-          roleId: temp.role.roleId,
-          status: temp.status,
-        };
+        this.expandRowKeys = [];
+        this.userInfo = [];
+        this.userLogin = [];
       }
     },
-    // 用户添加
-    addAdmin() {
-      addAdmin(this.addForm)
+
+    // 窗口
+    // 用户个人信息窗口
+    updateUserInfoDialog(uid) {
+      this.updateId = uid;
+      this.formDialogVisible = true;
+      this.formDialogTitle = "修改个人信息";
+      this.formFields = [
+        { label: "昵称", prop: "nickname" },
+        { label: "头像", prop: "avatar" },
+        { label: "性别", prop: "gender" },
+        { label: "年龄", prop: "age" },
+        { label: "生日", prop: "birthday" },
+        { label: "所在地", prop: "location" },
+      ];
+      this.form = this.userInfo[0];
+    },
+    // 用户登录信息窗口
+    updateUserLoginDialog(uid) {
+      this.updateId = uid;
+      this.formDialogVisible = true;
+      this.formDialogTitle = "修改登录信息";
+      this.formFields = [
+        { label: "用户名", prop: "username" },
+        { label: "密码", prop: "password" },
+      ];
+      this.form = this.userLogin[0];
+    },
+    // TODO 打开 添加窗口
+    showAddDialog() {
+      this.addDialogVisible = true;
+    },
+    // TODO 打开 修改窗口
+    showEditDialog(temp) {
+      this.updateId = temp.uid;
+      this.editDialogVisible = true;
+    },
+    // 关闭 添加窗口
+    addDialogClosed() {
+      this.getUserList();
+    },
+    // 关闭 修改窗口
+    editDialogClosed() {
+      this.getUserList();
+    },
+
+    // 请求
+    // 获取 用户 列表
+    getUserList() {
+      getUserList(this.queryInfo)
+        .then((response) => {
+          const { data: res } = response.data;
+          this.userList = res.list;
+          this.totalNum = res.total;
+          this.$message.success("获取成功");
+        })
+        .catch(() => {
+          this.$message.error("获取失败");
+        });
+    },
+    // 获取 用户 个人信息
+    getUserInfo(uid) {
+      getUserInfo(uid)
+        .then((response) => {
+          this.userInfo = [response.data.data];
+          this.$message.success("获取成功");
+        })
+        .catch(() => {
+          this.$message.error("获取失败");
+        });
+    },
+    // 获取 用户 登录信息
+    getUserLogin(uid) {
+      getUserLogin(uid)
+        .then((response) => {
+          this.userLogin = [response.data.data];
+          this.$message.success("获取成功");
+        })
+        .catch(() => {
+          this.$message.error("获取失败");
+        });
+    },
+    // 用户 登录
+    userlogin(temp) {
+      userLogin(temp)
+        .then((response) => {
+          console.log(response.data.data);
+          this.$message.success("登录成功");
+        })
+        .catch(() => {
+          this.$message.error("登录失败");
+        });
+    },
+    // 添加 用户
+    addUser() {
+      addUser(this.basciForm)
         .then(() => {
           this.$message.success("添加成功");
+          this.addDialogVisible = false;
         })
         .catch(() => {
           this.$message.error("添加失败");
         });
-      this.addDialogVisible = false;
-      this.getAdminList();
     },
-    // 获取所有角色
-    getRoles() {
-      getRoleList()
-        .then((response) => {
-          this.roleList = response.data.data;
+    // 修改 用户 手机号
+    updateUserPhone() {
+      updateUserPhone(this.updateId, this.editForm.phone)
+        .then(() => {
+          this.$message.success("修改成功");
+          this.editDialogVisible = false;
         })
         .catch(() => {
-          this.$message.error("获取角色失败");
+          this.$message.error("修改失败");
         });
     },
-    // 展示 添加用户 对话框
-    showAddDialog() {
-      this.resetAdminForm(null);
-      this.getRoles();
-      this.addDialogVisible = true;
+    // 更新 用户 个人信息
+    updateUserInfo(form) {
+      updateUserInfo(this.updateId, form)
+        .then(() => {
+          this.formDialogVisible = false;
+          this.getUserInfo(this.updateId);
+          this.$message.success("修改成功");
+        })
+        .catch(() => {
+          this.$message.error("修改失败");
+        });
     },
-    // 展示 编辑用户 对话框
-    showEditDialog(temp) {
-      this.resetAdminForm(temp);
-      this.originaName = temp.username;
-      this.getRoles();
-      this.editDialogVisible = true;
+    // 更新 用户 登录信息
+    updateUserLogin(form) {
+      updateUserLogin(this.updateId, form)
+        .then(() => {
+          this.formDialogVisible = false;
+          this.getUserLogin(this.updateId);
+          this.$message.success("修改成功");
+        })
+        .catch(() => {
+          this.$message.error("修改失败");
+        });
     },
-    // 监听 修改框 关闭
-    editDialogClosed() {
-      this.$refs.editFormRel.resetFields();
-    },
-    // 用户修改
-    editAdmin() {
-      this.$refs.editFormRel.validate((valid) => {
-        if (!valid) return;
-        updateAdmin(this.addForm)
-          .then(() => {
-            this.$message.success("修改成功");
-          })
-          .catch((error) => {
-            this.$message.error("修改失败" + error);
-          });
-
-        this.editDialogVisible = false;
-        this.getAdminList();
-      });
-    },
-    // 根据 id 删除用户
-    async removeAdmin(id) {
-      // 确认返回 confirm，取消返回 cancel
+    // 删除 用户
+    async deleteUser(id) {
       const result = await this.$confirm(
         "此操作将永久删除该用户，是否继续",
         "提示",
@@ -339,10 +420,10 @@ export default {
       ).catch((err) => err);
 
       if (result !== "confirm") return this.$message.info("已取消删除");
-      deleteAdmin(id)
+      deleteUser(id)
         .then(() => {
           this.$message.success("删除成功");
-          this.getAdminList();
+          this.getUserList();
         })
         .catch(() => {
           this.$message.error("删除失败");
@@ -352,5 +433,5 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style>
 </style>
