@@ -2,17 +2,17 @@
   <el-dialog
     :title="dialogTitle"
     :visible.sync="localVisible"
-    :width="width"
+    width="50%"
     @close="handleClose"
   >
-    <el-form :model="formData" ref="formRef">
+    <el-form :model="form" ref="formRef">
       <el-form-item
         v-for="field in fields"
         :key="field.prop"
         :label="field.label"
         :prop="field.prop"
       >
-        <el-input v-model="formData[field.prop]" />
+        <el-input v-model="form[field.prop]" />
       </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">
@@ -32,7 +32,6 @@ export default {
       sync: true,
     },
     dialogTitle: String,
-    width: String,
     fields: Array,
     formRef: String,
     formData: Object,
@@ -41,6 +40,9 @@ export default {
     // 监听父组件传递的 prop 变化，更新子组件中的局部属性
     visible(newVal) {
       this.localVisible = newVal;
+    },
+    formData(newVal) {
+      this.form = JSON.parse(JSON.stringify(newVal));
     },
   },
   data() {
@@ -54,16 +56,17 @@ export default {
   methods: {
     handleClose() {
       // 触发关闭对话框的事件
+      this.$refs.formRef.resetFields();
       this.$emit("update:visible", false);
     },
     handleCancel() {
       // 触发取消按钮点击事件
-      // this.$emit("cancel");
+      this.$refs.formRef.resetFields();
       this.$emit("update:visible", false);
     },
     handleSubmit() {
       // 触发确定按钮点击事件
-      this.$emit("submit", this.formData);
+      this.$emit("submit", this.form);
     },
   },
 };

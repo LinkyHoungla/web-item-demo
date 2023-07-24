@@ -81,7 +81,7 @@
                     type="primary"
                     icon="el-icon-edit"
                     size="mini"
-                    @click="updateUserLoginDialog(scope.row.uid)"
+                    @click="updateUserLoginDialog(scope.row)"
                     >修改信息</el-button
                   >
                 </template>
@@ -98,7 +98,7 @@
         <el-table-column label="创建时间" prop="createTime" />
         <el-table-column label="最近修改" prop="updateTime" />
         <el-table-column label="操作" width="160px">
-          <template>
+          <template slot-scope="scope">
             <!-- 修改按钮 -->
             <el-button
               type="primary"
@@ -286,15 +286,15 @@ export default {
       this.form = this.userInfo[0];
     },
     // 用户登录信息窗口
-    updateUserLoginDialog(uid) {
-      this.updateId = uid;
+    updateUserLoginDialog(temp) {
+      this.updateId = temp.uid;
       this.formDialogVisible = true;
       this.formDialogTitle = "修改登录信息";
       this.formFields = [
         { label: "用户名", prop: "username" },
         { label: "密码", prop: "password" },
       ];
-      this.form = this.userLogin[0];
+      this.form = temp;
     },
     // TODO 打开 添加窗口
     showAddDialog() {

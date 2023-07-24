@@ -24,6 +24,9 @@ import axios from 'axios'
 
 // 自定义 组件
 import FormDialog from '@/components/Dialog/FormDialog.vue'
+import TablePage from '@/components/Table.vue'
+
+Vue.component('table-page', TablePage)
 Vue.component('form-dialog', FormDialog)
 
 import store from './store'

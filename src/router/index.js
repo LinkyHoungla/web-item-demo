@@ -10,12 +10,15 @@ import Main from '@/components/Main.vue'
 import NotFound from '@/view/NotFound.vue'
 import Home from '@/view/Home.vue'
 
-import Admins from '@/view/User/Admins.vue'
-import Users from '@/view/User/Users.vue'
+import Admin from '@/view/User/Admins.vue'
+import User from '@/view/User/Users.vue'
 import Info from '@/view/User/Info.vue'
 
-import Rights from '@/view/Power/Rights.vue'
-import Roles from '@/view/Power/Roles.vue'
+import Right from '@/view/Power/Rights.vue'
+import Role from '@/view/Power/Roles.vue'
+
+import Store from "@/view/Shop/Store.vue";
+import Companion from '@/view/Shop/Companion.vue'
 
 Vue.use(VueRouter)
 
@@ -29,11 +32,13 @@ const router = new VueRouter({
       redirect: "/home",
       children: [
         { path: '/home', component: Home },
-        { path: '/admins', component: Admins },
-        { path: '/users', component: Users },
+        { path: '/admins', component: Admin },
+        { path: '/users', component: User },
         { path: '/info', component: Info },
-        { path: '/rights', component: Rights },
-        { path: '/roles', component: Roles },
+        { path: '/rights', component: Right },
+        { path: '/roles', component: Role },
+        { path: '/stores', component: Store },
+        { path: '/companions', component: Companion },
       ]
     },
     { path: '/404', component: NotFound },
