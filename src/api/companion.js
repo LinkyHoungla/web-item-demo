@@ -1,7 +1,7 @@
 import service from "@/util/request"
 
 // 获取 陪玩 列表
-export function getCompaionList(params) {
+export function getCompanionList(params) {
   return service({
     url: '/companion/list',
     method: 'get',
@@ -10,7 +10,7 @@ export function getCompaionList(params) {
 }
 
 // 获取 陪玩 信息
-export function getCompaionInfo(id) {
+export function getCompanionInfo(id) {
   return service({
     url: '/companion/' + id,
     method: 'get',
@@ -18,7 +18,7 @@ export function getCompaionInfo(id) {
 }
 
 // 添加 陪玩
-export function addCompaion(data) {
+export function addCompanion(data) {
   return service({
     url: '/companion',
     method: 'post',
@@ -27,7 +27,7 @@ export function addCompaion(data) {
 }
 
 // 修改 陪玩
-export function updateCompaion(id, data) {
+export function updateCompanion(id, data) {
   return service({
     url: '/companion/' + id,
     method: 'put',
@@ -36,7 +36,7 @@ export function updateCompaion(id, data) {
 }
 
 // 删除 陪玩
-export function deleteCompaion(id) {
+export function deleteCompanion(id) {
   return service({
     url: '/companion/' + id,
     method: 'delete',

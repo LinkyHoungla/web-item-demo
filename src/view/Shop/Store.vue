@@ -239,7 +239,7 @@ export default {
       deleteStore(id)
         .then(() => {
           this.$message.success("删除成功");
-          this.getUserList();
+          this.getStoreList();
         })
         .catch(() => {
           this.$message.error("删除失败");

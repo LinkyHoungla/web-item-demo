@@ -19,7 +19,7 @@
     </el-row>
 
     <!-- 列表区域 -->
-    <el-table :data="tableList" :row-key="(row) => row.storeId">
+    <el-table :data="tableList">
       <el-table-column type="index" />
       <el-table-column
         v-for="field in tableFields"
@@ -28,11 +28,22 @@
         :prop="field.prop"
       >
         <!-- 判断是否使用具名插槽 -->
-        <template v-if="field.type === 'template'">
-          <slot :name="field.prop" :row="scope.row" />
+        <template v-if="field.type === 'template'" v-slot="{ row }">
+          <slot :name="field.prop" :row="row" />
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- 分页区域 -->
+    <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="queryInfo.pageNum"
+      :page-sizes="[1, 2, 5, 10]"
+      :page-size="queryInfo.pageSize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="totalNum"
+    ></el-pagination>
   </el-card>
 </template>
 
@@ -41,6 +52,21 @@ export default {
   props: {
     addTitle: String,
     tableFields: Array,
+    list: Array,
+    total: Number,
+    update: Boolean,
+  },
+  watch: {
+    list(newVal) {
+      this.tableList = newVal;
+    },
+    total(newVal) {
+      this.totalNum = newVal;
+    },
+    update(newVal) {
+      console.log(newVal);
+      if (newVal === false) this.handleQuery();
+    },
   },
   data() {
     return {
@@ -60,11 +86,24 @@ export default {
     this.handleQuery();
   },
   methods: {
+    // 监听 pagesize 改变
+    handleSizeChange(newSize) {
+      this.queryInfo.pageSize = newSize;
+      this.handleQuery();
+    },
+    // 监听 页码值 改变
+    handleCurrentChange(newPage) {
+      this.queryInfo.pageNum = newPage;
+      this.handleQuery();
+    },
+
+    // 事件
     handleQuery() {
       this.$emit("query", this.queryInfo);
     },
     handleAdd() {
       this.$emit("add");
+      this.handleQuery();
     },
   },
 };
