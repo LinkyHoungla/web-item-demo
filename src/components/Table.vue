@@ -64,7 +64,6 @@ export default {
       this.totalNum = newVal;
     },
     update(newVal) {
-      console.log(newVal);
       if (newVal === false) this.handleQuery();
     },
   },

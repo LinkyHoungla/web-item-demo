@@ -2,13 +2,13 @@
   <div>
     <!-- 表格区域 -->
     <table-page
-      addTitle="添加陪玩"
+      addTitle="添加订单"
       :tableFields="tableFields"
       :total="totalNum"
       :list="tableList"
       :update="formDialogVisible"
-      @query="getCompanionList"
-      @add="addCompanionDialog"
+      @query="getOrderList"
+      @add="addOrderDialog"
     >
       <template v-slot:operate="{ row }">
         <!-- 修改按钮 -->
@@ -16,14 +16,14 @@
           type="primary"
           icon="el-icon-edit"
           size="mini"
-          @click="updateCompanionDialog(row)"
+          @click="updateOrderDialog(row)"
         />
         <!-- 删除按钮 -->
         <el-button
           type="danger"
           icon="el-icon-delete"
           size="mini"
-          @click="deleteCompanion(row.cid)"
+          @click="deleteOrder(row.cid)"
         />
       </template>
     </table-page>
@@ -41,28 +41,31 @@
 
 <script>
 import {
-  getCompanionInfo,
-  getCompanionList,
-  addCompanion,
-  updateCompanion,
-  deleteCompanion,
-} from "@/api/companion";
+  getOrderInfo,
+  getOrderList,
+  addOrder,
+  updateOrder,
+  deleteOrder,
+} from "@/api/order";
 
 export default {
-  name: "Companion",
+  name: "Order",
   data() {
     return {
       // 表格
       tableList: [],
       totalNum: 0,
       tableFields: [
-        { label: "陪玩ID", prop: "cid" },
+        { label: "订单ID", prop: "oid" },
         { label: "店铺ID", prop: "sid" },
         { label: "用户ID", prop: "uid" },
-        { label: "签名", prop: "signature" },
+        { label: "总金额", prop: "totalPrice" },
+        { label: "开始时间", prop: "startTime" },
+        { label: "服务时长", prop: "serveDuration" },
+        { label: "结束时间", prop: "endTime" },
         { label: "状态", prop: "status" },
         { label: "创建时间", prop: "createTime" },
-        { label: "修改时间", prop: "updateTime" },
+        { label: "更新时间", prop: "updateTime" },
         { label: "操作", prop: "operate", type: "template" },
       ],
 
@@ -77,30 +80,32 @@ export default {
   methods: {
     // 弹窗
     // 添加 陪玩
-    addCompanionDialog() {
+    addOrderDialog() {
       this.formDialogVisible = true;
-      this.formDialogTitle = "添加店铺";
+      this.formDialogTitle = "添加订单";
       this.formFields = [
         { label: "用户ID", prop: "uid" },
         { label: "店铺ID", prop: "sid" },
-        { label: "个性签名", prop: "signature" },
       ];
       this.form = {};
-      this.handleFormSubmit = this.addCompanion;
+      this.handleFormSubmit = this.addOrder;
     },
     // 添加 陪玩
-    updateCompanionDialog(temp) {
+    updateOrderDialog(temp) {
       this.formDialogVisible = true;
-      this.formDialogTitle = "修改陪玩";
-      this.formFields = [{ label: "个性签名", prop: "signature" }];
+      this.formDialogTitle = "修改订单";
+      this.formFields = [
+        { label: "开始时间", prop: "startTime" },
+        { label: "结束时间", prop: "endTime" },
+      ];
       this.form = temp;
-      this.handleFormSubmit = this.updateCompanion;
+      this.handleFormSubmit = this.updateOrder;
     },
 
     // 请求
     // 获取 用户 列表
-    getCompanionList(query) {
-      getCompanionList(query)
+    getOrderList(query) {
+      getOrderList(query)
         .then((response) => {
           const { data: res } = response.data;
           this.tableList = res.list;
@@ -112,8 +117,8 @@ export default {
         });
     },
     // 获取 用户 个人信息
-    getCompanionInfo(id) {
-      getCompanionInfo(id)
+    getOrderInfo(id) {
+      getOrderInfo(id)
         .then((response) => {
           this.storeInfo = response.data.data;
           this.$message.success("获取成功");
@@ -123,8 +128,8 @@ export default {
         });
     },
     // 添加 用户
-    addCompanion(form) {
-      addCompanion(form)
+    addOrder(form) {
+      addOrder(form)
         .then(() => {
           this.formDialogVisible = false;
           this.$message.success("添加成功");
@@ -134,8 +139,8 @@ export default {
         });
     },
     // 修改 用户
-    updateCompanion(form) {
-      updateCompanion(form.cid, form)
+    updateOrder(form) {
+      updateOrder(form.oid, form)
         .then(() => {
           this.formDialogVisible = false;
           this.$message.success("修改成功");
@@ -145,7 +150,7 @@ export default {
         });
     },
     // 删除 用户
-    async deleteCompanion(id) {
+    async deleteOrder(id) {
       const result = await this.$confirm(
         "此操作将永久删除该用户，是否继续",
         "提示",
@@ -157,7 +162,7 @@ export default {
       ).catch((err) => err);
 
       if (result !== "confirm") return this.$message.info("已取消删除");
-      deleteCompanion(id)
+      deleteOrder(id)
         .then(() => {
           this.$message.success("删除成功");
         })

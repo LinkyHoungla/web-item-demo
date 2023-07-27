@@ -20,6 +20,8 @@ import Role from '@/view/Power/Roles.vue'
 import Store from "@/view/Shop/Store.vue";
 import Companion from '@/view/Shop/Companion.vue'
 
+import Order from '@/view/order/Orders.vue'
+
 Vue.use(VueRouter)
 
 const router = new VueRouter({
@@ -39,6 +41,7 @@ const router = new VueRouter({
         { path: '/roles', component: Role },
         { path: '/stores', component: Store },
         { path: '/companions', component: Companion },
+        { path: '/orders', component: Order },
       ]
     },
     { path: '/404', component: NotFound },

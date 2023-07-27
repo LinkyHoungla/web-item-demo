@@ -170,7 +170,6 @@ export default {
         { label: "店铺描述", prop: "storeDesc" },
       ];
       this.form = temp;
-      console.log(this.form);
       this.handleFormSubmit = this.updateStore;
     },
 
