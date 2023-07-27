@@ -19,6 +19,9 @@ import Role from '@/view/Power/Roles.vue'
 
 import Store from "@/view/Shop/Store.vue";
 import Companion from '@/view/Shop/Companion.vue'
+import Service from '@/view/Shop/Service.vue'
+import Game from '@/view/Shop/Game.vue'
+
 
 import Order from '@/view/order/Orders.vue'
 
@@ -41,6 +44,8 @@ const router = new VueRouter({
         { path: '/roles', component: Role },
         { path: '/stores', component: Store },
         { path: '/companions', component: Companion },
+        { path: '/service', component: Service },
+        { path: '/games', component: Game },
         { path: '/orders', component: Order },
       ]
     },

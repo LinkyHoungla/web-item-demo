@@ -12,7 +12,19 @@
         :label="field.label"
         :prop="field.prop"
       >
-        <el-input v-model="form[field.prop]" />
+        <template v-if="field.type === undefined">
+          <el-input v-model="form[field.prop]" />
+        </template>
+        <template v-if="field.type === 'el-select'">
+          <el-select v-model="form[field.prop]">
+            <el-option
+              v-for="option in field.options"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
+            />
+          </el-select>
+        </template>
       </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">
